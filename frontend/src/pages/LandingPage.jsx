@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import MotivationalPopup from '../components/MotivationalPopup'
+
 
 const useInView = (threshold = 0.15) => {
   const ref = useRef(null)
@@ -672,7 +672,7 @@ export default function LandingPage() {
       `}</style>
 
       <div className="lp">
-        {showPopup && <MotivationalPopup onClose={() => setShowPopup(false)} />}
+        
         <Navbar />
 
         {/* ── HERO ── */}
