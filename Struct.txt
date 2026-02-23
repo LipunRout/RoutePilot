@@ -1,0 +1,73 @@
+routepilot/
+│
+├── frontend/                          # React App
+│   ├── public/
+│   │   └── index.html
+│   ├── src/
+│   │   ├── assets/                    # Images, icons, logos
+│   │   │
+│   │   ├── components/                # Reusable UI components
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── Footer.jsx
+│   │   │   ├── MotivationalPopup.jsx
+│   │   │   ├── RoadmapCard.jsx
+│   │   │   ├── PhaseCard.jsx
+│   │   │   └── Loader.jsx
+│   │   │
+│   │   ├── pages/                     # Full pages
+│   │   │   ├── LandingPage.jsx
+│   │   │   ├── LoginPage.jsx
+│   │   │   ├── RegisterPage.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── CategorySelect.jsx
+│   │   │   ├── RoleSelect.jsx
+│   │   │   ├── UserDetailsForm.jsx
+│   │   │   └── RoadmapPage.jsx
+│   │   │
+│   │   ├── data/                      # Static JSON data
+│   │   │   └── roles.json             # IT/Non-IT roles list
+│   │   │
+│   │   ├── context/                   # Global state
+│   │   │   └── AuthContext.jsx        # Supabase auth context
+│   │   │
+│   │   ├── services/                  # API calls
+│   │   │   ├── api.js                 # Axios calls to backend
+│   │   │   └── supabase.js            # Supabase client setup
+│   │   │
+│   │   ├── utils/                     # Helper functions
+│   │   │   └── formatRoadmap.js
+│   │   │
+│   │   ├── App.jsx                    # Routes defined here
+│   │   ├── main.jsx                   # Entry point
+│   │   └── index.css                  # Global styles
+│   │
+│   ├── .env                           # VITE_SUPABASE_URL, VITE_SUPABASE_KEY
+│   └── package.json
+│
+├── backend/                           # Node + Express App
+│   ├── controllers/
+│   │   ├── roadmapController.js       # Gemini API logic
+│   │   ├── emailController.js         # Send PDF via email
+│   │   └── callController.js          # Store 1:1 call requests
+│   │
+│   ├── routes/
+│   │   ├── roadmapRoutes.js           # POST /generate-roadmap
+│   │   ├── emailRoutes.js             # POST /send-email
+│   │   └── callRoutes.js              # POST /book-call
+│   │
+│   ├── services/
+│   │   ├── geminiService.js           # Prompt + Gemini API call
+│   │   ├── pdfService.js              # JSON → PDF conversion
+│   │   └── emailService.js            # Nodemailer setup
+│   │
+│   ├── middleware/
+│   │   └── authMiddleware.js          # Verify Supabase JWT token
+│   │
+│   ├── utils/
+│   │   └── promptBuilder.js           # Build smart Gemini prompt
+│   │
+│   ├── .env                           # GEMINI_KEY, EMAIL, SUPABASE keys
+│   ├── server.js                      # Entry point
+│   └── package.json
+│
+└── README.md
