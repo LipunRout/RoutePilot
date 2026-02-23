@@ -1,494 +1,821 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { useTheme } from '../context/ThemeContext'
-import toast from 'react-hot-toast'
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 
 const Navbar = () => {
-  const [scrolled, setScrolled] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const { user, signOut, isAuthenticated } = useAuth()
-  const { theme, toggleTheme } = useTheme()
-  const navigate = useNavigate()
-  const location = useLocation()
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50)
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-  // Close menu on route change
+  useEffect(() => { setMenuOpen(false); }, [location]);
+
   useEffect(() => {
-    setMenuOpen(false)
-  }, [location])
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
 
-  const handleSignOut = async () => {
-    try {
-      await signOut()
-      toast.success('Logged out successfully!')
-      navigate('/')
-    } catch (err) {
-      toast.error('Logout failed!')
-    }
-  }
+  const links = [
+    { to: "/",          label: "Home",      icon: "⌂" },
+    { to: "/category",  label: "Explore",   icon: "◎" },
+    { to: "/dashboard", label: "Dashboard", icon: "▤" },
+    { to: "/roadmap",   label: "Roadmap",   icon: "◈" },
+  ];
 
   return (
     <>
       <style>{`
-        .navbar {
+      /* ── GOOGLE FONTS ── */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:ital,wght@1,500;1,600&display=swap');
+
+  /* ── GLOBAL FONT (Inter) ── */
+  .lp {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+  }
+
+  /* ── ELEGANT CURSIVE MIX (Playfair Italic) ── */
+  .hero-title em,
+  .gradient-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 600;
+  }
+
+        /* ═══════════════════════════════
+           NAVBAR
+        ═══════════════════════════════ */
+        .nb {
           position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
+          top: 0; left: 0; right: 0;
           z-index: 1000;
-          padding: 1rem 2rem;
-          transition: all 0.4s ease;
+          height: 64px;
+          display: flex;
+          align-items: center;
+          padding: 0 24px;
+          background: var(--bg-1);
+          border-bottom: 1px solid var(--border);
+          transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .navbar.scrolled {
-          background: rgba(2, 12, 20, 0.85);
+        .nb.scrolled {
+          background: rgba(8,12,16,0.92);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(0, 255, 136, 0.15);
-          padding: 0.7rem 2rem;
-          box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 1px 0 rgba(255,255,255,0.04);
         }
 
-        [data-theme="light"] .navbar.scrolled {
-          background: rgba(240, 255, 244, 0.85);
+        [data-theme="light"] .nb {
+          background: #ffffff;
         }
 
-        .navbar-inner {
-          max-width: 1200px;
+        [data-theme="light"] .nb.scrolled {
+          background: rgba(255,255,255,0.95);
+        }
+
+        .nb-inner {
+          max-width: 1140px;
           margin: 0 auto;
+          width: 100%;
           display: flex;
           align-items: center;
           justify-content: space-between;
         }
 
-        /* Logo */
-        .nav-logo {
-          font-family: 'Orbitron', monospace;
-          font-size: 1.5rem;
-          font-weight: 900;
+        /* ═══════════════════════════════
+           LOGO — EYE CATCHING
+        ═══════════════════════════════ */
+        .nb-logo {
           text-decoration: none;
-          background: linear-gradient(135deg, #00ff88, #00d4ff);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          letter-spacing: 2px;
-          position: relative;
-          transition: all 0.3s ease;
-        }
-
-        .nav-logo::after {
-          content: '';
-          position: absolute;
-          bottom: -4px;
-          left: 0;
-          width: 0;
-          height: 2px;
-          background: linear-gradient(90deg, #00ff88, #00d4ff);
-          transition: width 0.3s ease;
-        }
-
-        .nav-logo:hover::after {
-          width: 100%;
-        }
-
-        .nav-logo span {
-          font-size: 0.6rem;
-          display: block;
-          letter-spacing: 4px;
-          font-family: 'Rajdhani', sans-serif;
-          font-weight: 400;
-          background: linear-gradient(135deg, #00ff88, #00d4ff);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          margin-top: -4px;
-        }
-
-        /* Nav Links */
-        .nav-links {
           display: flex;
           align-items: center;
-          gap: 2rem;
+          gap: 11px;
+          flex-shrink: 0;
+          position: relative;
+        }
+
+        /* Icon wrapper with ring animation */
+        .nb-logo-icon-wrap {
+          position: relative;
+          width: 38px; height: 38px;
+          flex-shrink: 0;
+        }
+
+        /* Spinning gradient ring */
+        .nb-logo-ring {
+          position: absolute;
+          inset: -3px;
+          border-radius: 13px;
+          background: conic-gradient(
+            from 0deg,
+            #00c97a,
+            #0ea5e9,
+            #00c97a
+          );
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          animation: nbRingSpin 3s linear infinite;
+          z-index: 0;
+        }
+
+        @keyframes nbRingSpin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+
+        .nb-logo:hover .nb-logo-ring {
+          opacity: 1;
+        }
+
+        /* White mask to make ring look like border */
+        .nb-logo-ring-mask {
+          position: absolute;
+          inset: 1px;
+          border-radius: 11px;
+          background: var(--bg-1);
+          z-index: 1;
+          transition: background 0.3s ease;
+        }
+
+        [data-theme="light"] .nb-logo-ring-mask {
+          background: #ffffff;
+        }
+
+        /* Actual image */
+        .nb-logo-img {
+          position: absolute;
+          inset: 2px;
+          width: calc(100% - 4px);
+          height: calc(100% - 4px);
+          object-fit: cover;
+          border-radius: 9px;
+          z-index: 2;
+          transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .nb-logo:hover .nb-logo-img {
+          transform: scale(1.06);
+        }
+
+        /* Glow behind icon */
+        .nb-logo-glow {
+          position: absolute;
+          inset: -6px;
+          border-radius: 18px;
+          background: radial-gradient(circle, rgba(0,201,122,0.35) 0%, transparent 70%);
+          opacity: 0;
+          z-index: 0;
+          transition: opacity 0.3s ease;
+          filter: blur(6px);
+        }
+
+        .nb-logo:hover .nb-logo-glow {
+          opacity: 1;
+        }
+
+        /* Text section */
+        .nb-logo-text-wrap {
+          display: flex;
+          flex-direction: column;
+          gap: 1px;
+        }
+
+        .nb-logo-name {
+          font-size: 1.12rem;
+          font-weight: 800;
+          letter-spacing: -0.05em;
+          line-height: 1;
+          display: flex;
+          align-items: center;
+          gap: 1px;
+        }
+
+        .nb-logo-route {
+          color: var(--text-1);
+          transition: color 0.2s ease;
+        }
+
+        .nb-logo-pilot {
+          background: linear-gradient(135deg, #00c97a 0%, #0ea5e9 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          font-weight: 800;
+        }
+
+        /* Animated dot after name */
+        .nb-logo-dot {
+          width: 6px; height: 6px;
+          border-radius: 50%;
+          background: var(--primary);
+          margin-left: 3px;
+          flex-shrink: 0;
+          box-shadow: 0 0 6px rgba(0,201,122,0.6);
+          animation: nbDotPulse 2s ease-in-out infinite;
+          align-self: center;
+          margin-bottom: 2px;
+        }
+
+        @keyframes nbDotPulse {
+          0%, 100% { transform: scale(1);   opacity: 1;   }
+          50%       { transform: scale(1.4); opacity: 0.6; }
+        }
+
+        .nb-logo-tag {
+          font-size: 0.58rem;
+          color: var(--text-3);
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          font-weight: 500;
+          line-height: 1;
+        }
+
+        /* ═══════════════════════════════
+           DESKTOP LINKS
+        ═══════════════════════════════ */
+        .nb-links {
+          display: flex;
+          align-items: center;
+          gap: 2px;
           list-style: none;
-        }
-
-        .nav-link {
-          font-family: 'Rajdhani', sans-serif;
-          font-size: 1rem;
-          font-weight: 600;
-          color: var(--text-secondary);
-          text-decoration: none;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          position: relative;
-          transition: color 0.3s ease;
-        }
-
-        .nav-link::after {
-          content: '';
           position: absolute;
-          bottom: -4px;
-          left: 0;
-          width: 0;
-          height: 2px;
-          background: linear-gradient(90deg, #00ff88, #00d4ff);
-          transition: width 0.3s ease;
+          left: 50%;
+          transform: translateX(-50%);
         }
 
-        .nav-link:hover,
-        .nav-link.active {
-          color: #00ff88;
+        .nb-link-item { position: relative; }
+
+        .nb-link-bg {
+          position: absolute; inset: 0;
+          border-radius: 8px;
+          background: var(--surface);
+          opacity: 0;
+          transition: opacity 0.15s ease;
+          pointer-events: none;
         }
 
-        .nav-link:hover::after,
-        .nav-link.active::after {
-          width: 100%;
-        }
+        .nb-link-item:hover .nb-link-bg,
+        .nb-link-item.active .nb-link-bg { opacity: 1; }
 
-        /* Nav Actions */
-        .nav-actions {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-
-        /* Theme Toggle */
-        .nav-theme-btn {
-          width: 42px;
-          height: 42px;
-          border-radius: 50%;
-          border: 1px solid rgba(0, 255, 136, 0.3);
-          background: rgba(0, 255, 136, 0.05);
-          backdrop-filter: blur(10px);
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.1rem;
-          transition: all 0.3s ease;
-          color: #00ff88;
-        }
-
-        .nav-theme-btn:hover {
-          border-color: #00ff88;
-          background: rgba(0, 255, 136, 0.15);
-          box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-          transform: rotate(20deg) scale(1.1);
-        }
-
-        /* User Avatar */
-        .nav-avatar {
-          width: 38px;
-          height: 38px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #00ff88, #00d4ff);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: 'Orbitron', monospace;
-          font-size: 0.9rem;
-          font-weight: 700;
-          color: #000;
-          cursor: pointer;
-          border: 2px solid rgba(0, 255, 136, 0.5);
-          transition: all 0.3s ease;
+        .nb-link {
+          font-size: 0.875rem;
+          font-weight: 400;
+          color: var(--text-2);
+          text-decoration: none;
+          padding: 6px 14px;
+          border-radius: 8px;
+          display: block;
           position: relative;
+          z-index: 1;
+          transition: color 0.15s ease;
+          white-space: nowrap;
         }
 
-        .nav-avatar:hover {
-          box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
-          transform: scale(1.1);
+        .nb-link:hover  { color: var(--text-1); }
+        .nb-link.active { color: var(--text-1); font-weight: 500; }
+
+        .nb-link-dot {
+          position: absolute;
+          bottom: -2px; left: 50%;
+          transform: translateX(-50%);
+          width: 4px; height: 4px;
+          border-radius: 50%;
+          background: var(--primary);
+          opacity: 0;
+          transition: opacity 0.2s ease;
         }
 
-        /* Logout Button */
-        .nav-logout {
-          font-family: 'Rajdhani', sans-serif;
-          font-size: 0.9rem;
-          font-weight: 700;
-          color: #ff4444;
-          background: rgba(255, 68, 68, 0.1);
-          border: 1px solid rgba(255, 68, 68, 0.3);
-          border-radius: 50px;
-          padding: 8px 20px;
-          cursor: pointer;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          transition: all 0.3s ease;
+        .nb-link-item.active .nb-link-dot { opacity: 1; }
+
+        /* ═══════════════════════════════
+           DESKTOP ACTIONS
+        ═══════════════════════════════ */
+        .nb-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
         }
 
-        .nav-logout:hover {
-          background: rgba(255, 68, 68, 0.2);
-          border-color: #ff4444;
-          box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
-          transform: scale(1.05);
-        }
-
-        /* Auth Buttons */
-        .nav-btn-login {
-          font-family: 'Rajdhani', sans-serif;
-          font-size: 0.95rem;
-          font-weight: 700;
-          color: #00ff88;
+        .nb-theme {
+          width: 34px; height: 34px;
+          border-radius: 8px;
+          border: 1px solid var(--border);
           background: transparent;
-          border: 1px solid rgba(0, 255, 136, 0.4);
-          border-radius: 50px;
-          padding: 8px 22px;
           cursor: pointer;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          transition: all 0.3s ease;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 0.88rem;
+          color: var(--text-2);
+          transition: all 0.15s ease;
+        }
+
+        .nb-theme:hover {
+          background: var(--surface);
+          color: var(--text-1);
+          border-color: var(--border-hover);
+        }
+
+        .nb-theme:active { transform: scale(0.9); }
+
+        .nb-signin {
+          height: 34px;
+          padding: 0 14px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: var(--text-2);
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          cursor: pointer;
           text-decoration: none;
-          display: inline-block;
+          display: inline-flex; align-items: center;
+          transition: all 0.15s ease;
         }
 
-        .nav-btn-login:hover {
-          background: rgba(0, 255, 136, 0.1);
-          border-color: #00ff88;
-          box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        .nb-signin:hover {
+          color: var(--text-1);
+          border-color: var(--border-hover);
+          background: var(--surface);
         }
 
-        .nav-btn-register {
-          font-family: 'Rajdhani', sans-serif;
-          font-size: 0.95rem;
-          font-weight: 700;
+        .nb-start {
+          height: 34px;
+          padding: 0 14px;
+          font-size: 0.875rem;
+          font-weight: 500;
           color: #000;
-          background: linear-gradient(135deg, #00ff88, #00d4ff);
+          background: var(--primary);
           border: none;
-          border-radius: 50px;
-          padding: 9px 22px;
+          border-radius: 8px;
           cursor: pointer;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          transition: all 0.3s ease;
           text-decoration: none;
-          display: inline-block;
+          display: inline-flex; align-items: center; gap: 5px;
+          transition: all 0.15s ease;
         }
 
-        .nav-btn-register:hover {
-          transform: scale(1.05);
-          box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        .nb-start:hover {
+          background: #00e089;
+          box-shadow: 0 0 18px rgba(0,201,122,0.3);
+          transform: translateY(-1px);
         }
 
-        /* Hamburger */
-        .hamburger {
+        .nb-start:active { transform: scale(0.97); }
+
+        .nb-start .arr {
+          font-size: 0.78rem;
+          transition: transform 0.2s ease;
+        }
+
+        .nb-start:hover .arr { transform: translateX(3px); }
+
+        /* ═══════════════════════════════
+           HAMBURGER
+        ═══════════════════════════════ */
+        .nb-hamburger {
           display: none;
           flex-direction: column;
+          justify-content: center;
+          align-items: center;
           gap: 5px;
+          width: 38px; height: 38px;
+          border-radius: 8px;
+          border: 1px solid var(--border);
+          background: transparent;
           cursor: pointer;
-          padding: 5px;
-          background: none;
-          border: none;
+          padding: 0;
+          transition: all 0.15s ease;
+          flex-shrink: 0;
         }
 
-        .hamburger span {
+        .nb-hamburger:hover {
+          background: var(--surface);
+          border-color: var(--border-hover);
+        }
+
+        .nb-bar {
           display: block;
-          width: 26px;
-          height: 2px;
-          background: #00ff88;
+          width: 16px; height: 1.5px;
           border-radius: 2px;
-          transition: all 0.3s ease;
+          background: var(--text-2);
+          transition: transform 0.25s ease, opacity 0.25s ease, width 0.25s ease;
+          transform-origin: center;
         }
 
-        .hamburger.open span:nth-child(1) {
-          transform: rotate(45deg) translate(5px, 5px);
-        }
+        .nb-hamburger.open .nb-bar:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+        .nb-hamburger.open .nb-bar:nth-child(2) { opacity: 0; width: 0; }
+        .nb-hamburger.open .nb-bar:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
 
-        .hamburger.open span:nth-child(2) {
-          opacity: 0;
-          transform: scaleX(0);
-        }
-
-        .hamburger.open span:nth-child(3) {
-          transform: rotate(-45deg) translate(5px, -5px);
-        }
-
-        /* Mobile Menu */
-        .mobile-menu {
+        /* ═══════════════════════════════
+           MOBILE OVERLAY
+        ═══════════════════════════════ */
+        .nb-overlay {
           display: none;
           position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(2, 12, 20, 0.97);
-          backdrop-filter: blur(20px);
+          inset: 0;
           z-index: 999;
-          flex-direction: column;
+        }
+
+        .nb-overlay.open { display: block; }
+
+        .nb-backdrop {
+          position: absolute; inset: 0;
+          background: rgba(0,0,0,0.55);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          animation: nbFadeIn 0.25s ease forwards;
+          cursor: pointer;
+        }
+
+        @keyframes nbFadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+
+        .nb-panel {
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          background: var(--bg-1);
+          border-bottom: 1px solid var(--border);
+          box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+          animation: nbSlideDown 0.3s cubic-bezier(0.4,0,0.2,1) forwards;
+        }
+
+        [data-theme="light"] .nb-panel {
+          box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        @keyframes nbSlideDown {
+          from { transform: translateY(-100%); opacity: 0.6; }
+          to   { transform: translateY(0);     opacity: 1;   }
+        }
+
+        .nb-panel-top {
+          height: 64px;
+          display: flex;
           align-items: center;
-          justify-content: center;
-          gap: 2rem;
-          opacity: 0;
-          pointer-events: none;
-          transition: all 0.4s ease;
+          justify-content: space-between;
+          padding: 0 20px;
+          border-bottom: 1px solid var(--border);
         }
 
-        [data-theme="light"] .mobile-menu {
-          background: rgba(240, 255, 244, 0.97);
-        }
-
-        .mobile-menu.open {
-          display: flex;
-          opacity: 1;
-          pointer-events: all;
-        }
-
-        .mobile-nav-link {
-          font-family: 'Orbitron', monospace;
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: var(--text-secondary);
+        .nb-panel-logo {
+          display: flex; align-items: center; gap: 9px;
           text-decoration: none;
-          letter-spacing: 3px;
-          text-transform: uppercase;
-          transition: all 0.3s ease;
+        }
+
+        /* Mini logo icon for panel */
+        .nb-panel-icon-wrap {
           position: relative;
+          width: 30px; height: 30px;
+          flex-shrink: 0;
         }
 
-        .mobile-nav-link:hover {
-          color: #00ff88;
-          text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        .nb-panel-icon-ring {
+          position: absolute; inset: -2px;
+          border-radius: 10px;
+          background: conic-gradient(from 0deg, #00c97a, #0ea5e9, #00c97a);
+          animation: nbRingSpin 3s linear infinite;
+          z-index: 0;
         }
 
-        .mobile-menu-actions {
-          display: flex;
-          gap: 1rem;
-          margin-top: 1rem;
-          flex-wrap: wrap;
+        .nb-panel-icon-mask {
+          position: absolute; inset: 1px;
+          border-radius: 8px;
+          background: var(--bg-1);
+          z-index: 1;
+        }
+
+        [data-theme="light"] .nb-panel-icon-mask {
+          background: #ffffff;
+        }
+
+        .nb-panel-icon-img {
+          position: absolute; inset: 2px;
+          width: calc(100% - 4px); height: calc(100% - 4px);
+          object-fit: cover;
+          border-radius: 6px;
+          z-index: 2;
+        }
+
+        .nb-panel-logo-name {
+          font-size: 0.95rem;
+          font-weight: 800;
+          letter-spacing: -0.04em;
+          color: var(--text-1);
+        }
+
+        .nb-panel-logo-pilot {
+          background: linear-gradient(135deg, #00c97a, #0ea5e9);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .nb-panel-close {
+          width: 32px; height: 32px;
+          border-radius: 8px;
+          border: 1px solid var(--border);
+          background: transparent;
+          cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 0.8rem;
+          color: var(--text-2);
+          transition: all 0.15s ease;
+        }
+
+        .nb-panel-close:hover {
+          background: var(--surface);
+          color: var(--text-1);
+        }
+
+        .nb-panel-section {
+          font-size: 0.67rem;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--text-3);
+          padding: 14px 20px 6px;
+        }
+
+        .nb-panel-list {
+          list-style: none;
+          padding: 0 10px;
+        }
+
+        .nb-panel-link {
+          display: flex; align-items: center; gap: 11px;
+          font-size: 0.9rem; font-weight: 500;
+          color: var(--text-2);
+          text-decoration: none;
+          padding: 10px 12px;
+          border-radius: 10px;
+          transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .nb-panel-link:hover { background: var(--surface); color: var(--text-1); }
+        .nb-panel-link.active { background: var(--primary-dim); color: var(--primary); }
+
+        .nb-panel-list li:nth-child(1) .nb-panel-link { animation: nbLinkIn 0.3s ease 0.05s both; }
+        .nb-panel-list li:nth-child(2) .nb-panel-link { animation: nbLinkIn 0.3s ease 0.10s both; }
+        .nb-panel-list li:nth-child(3) .nb-panel-link { animation: nbLinkIn 0.3s ease 0.15s both; }
+        .nb-panel-list li:nth-child(4) .nb-panel-link { animation: nbLinkIn 0.3s ease 0.20s both; }
+
+        @keyframes nbLinkIn {
+          from { opacity: 0; transform: translateX(-8px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+
+        .nb-panel-link-icon {
+          width: 30px; height: 30px;
+          border-radius: 8px;
+          background: var(--bg-2);
+          border: 1px solid var(--border);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 0.82rem;
+          flex-shrink: 0;
+          transition: all 0.15s ease;
+        }
+
+        .nb-panel-link.active .nb-panel-link-icon {
+          background: var(--primary-dim);
+          border-color: var(--primary-border);
+        }
+
+        .nb-panel-link-chevron {
+          margin-left: auto;
+          font-size: 0.8rem;
+          color: var(--text-3);
+          transition: transform 0.15s ease;
+        }
+
+        .nb-panel-link:hover .nb-panel-link-chevron {
+          transform: translateX(3px);
+          color: var(--text-2);
+        }
+
+        .nb-panel-divider {
+          height: 1px;
+          background: var(--border);
+          margin: 10px 20px;
+        }
+
+        .nb-panel-theme {
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 9px 12px;
+          margin: 0 10px;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: background 0.15s ease;
+          animation: nbLinkIn 0.3s ease 0.22s both;
+        }
+
+        .nb-panel-theme:hover { background: var(--surface); }
+
+        .nb-panel-theme-label {
+          font-size: 0.875rem; font-weight: 500;
+          color: var(--text-2);
+          display: flex; align-items: center; gap: 8px;
+        }
+
+        .nb-toggle {
+          width: 40px; height: 22px;
+          border-radius: 50px;
+          border: 1px solid var(--border);
+          background: var(--bg-3);
+          cursor: pointer;
+          position: relative;
+          transition: background 0.22s ease, border-color 0.22s ease;
+          flex-shrink: 0;
+        }
+
+        .nb-toggle.on { background: var(--primary); border-color: var(--primary); }
+
+        .nb-toggle-thumb {
+          position: absolute;
+          top: 2px; left: 2px;
+          width: 16px; height: 16px;
+          border-radius: 50%;
+          background: var(--text-3);
+          transition: left 0.22s cubic-bezier(0.4,0,0.2,1), background 0.22s ease;
+        }
+
+        .nb-toggle.on .nb-toggle-thumb {
+          left: calc(100% - 18px);
+          background: #000;
+        }
+
+        .nb-panel-auth {
+          display: flex; gap: 8px;
+          padding: 0 10px 4px;
+          animation: nbLinkIn 0.3s ease 0.28s both;
+        }
+
+        .nb-panel-auth .nb-signin,
+        .nb-panel-auth .nb-start {
+          flex: 1;
           justify-content: center;
+          height: 40px;
+          border-radius: 10px;
+          font-size: 0.875rem;
         }
 
+        /* ═══════════════════════════════
+           RESPONSIVE
+        ═══════════════════════════════ */
         @media (max-width: 768px) {
-          .nav-links,
-          .nav-actions {
-            display: none;
-          }
-
-          .hamburger {
-            display: flex;
-          }
-
-          .navbar {
-            padding: 1rem 1.5rem;
-          }
+          .nb-links     { display: none; }
+          .nb-actions   { display: none; }
+          .nb-hamburger { display: flex; }
+          .nb           { padding: 0 18px; height: 60px; }
         }
+
       `}</style>
 
-      <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
-        <div className="navbar-inner">
+      {/* ═══ NAVBAR ═══ */}
+      <nav className={`nb ${scrolled ? "scrolled" : ""}`}>
+        <div className="nb-inner">
 
-          {/* Logo */}
-          <Link to="/" className="nav-logo">
-            RoutePilot
-            <span>AI Career Navigator</span>
+          {/* ── LOGO ── */}
+          <Link to="/" className="nb-logo">
+            <div className="nb-logo-icon-wrap">
+              <div className="nb-logo-glow" />
+              <div className="nb-logo-ring" />
+              <div className="nb-logo-ring-mask" />
+              <img src="/favicon.png" alt="RoutePilot" className="nb-logo-img" />
+            </div>
+            <div className="nb-logo-text-wrap">
+              <div className="nb-logo-name">
+                <span className="nb-logo-route">Route</span>
+                <span className="nb-logo-pilot">Pilot</span>
+                <span className="nb-logo-dot" />
+              </div>
+              <div className="nb-logo-tag">AI Career Navigator</div>
+            </div>
           </Link>
 
-          {/* Desktop Links */}
-          <ul className="nav-links">
-            <li>
-              <Link
-                to="/"
-                className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
-              >
-                Home
-              </Link>
-            </li>
-            {isAuthenticated && (
-              <>
-                <li>
-                  <Link
-                    to="/dashboard"
-                    className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
-                  >
-                    Dashboard
+          {/* ── DESKTOP LINKS ── */}
+          <ul className="nb-links">
+            {links.map((l) => {
+              const active = location.pathname === l.to;
+              return (
+                <li key={l.to} className={`nb-link-item ${active ? "active" : ""}`}>
+                  <div className="nb-link-bg" />
+                  <Link to={l.to} className={`nb-link ${active ? "active" : ""}`}>
+                    {l.label}
                   </Link>
+                  <div className="nb-link-dot" />
                 </li>
-                <li>
-                  <Link
-                    to="/category"
-                    className={`nav-link ${location.pathname === '/category' ? 'active' : ''}`}
-                  >
-                    Explore
-                  </Link>
-                </li>
-              </>
-            )}
+              );
+            })}
           </ul>
 
-          {/* Desktop Actions */}
-          <div className="nav-actions">
-            {/* Theme Toggle */}
-            <button
-              className="nav-theme-btn"
-              onClick={toggleTheme}
-              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            >
-              {theme === 'dark' ? '☀️' : '🌙'}
+          {/* ── DESKTOP ACTIONS ── */}
+          <div className="nb-actions">
+            <button className="nb-theme" onClick={toggleTheme} title="Toggle theme">
+              {theme === "dark" ? "☀" : "☽"}
             </button>
-
-            {isAuthenticated ? (
-              <>
-                <div
-                  className="nav-avatar"
-                  title={user?.email}
-                >
-                  {user?.email?.charAt(0).toUpperCase()}
-                </div>
-                <button className="nav-logout" onClick={handleSignOut}>
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="nav-btn-login">Login</Link>
-                <Link to="/register" className="nav-btn-register">Get Started</Link>
-              </>
-            )}
-
-            {/* Hamburger */}
-            <button
-              className={`hamburger ${menuOpen ? 'open' : ''}`}
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-label="Toggle menu"
-            >
-              <span />
-              <span />
-              <span />
-            </button>
+            <Link to="/login" className="nb-signin">Sign in</Link>
+            <Link to="/register" className="nb-start">
+              Get started <span className="arr">→</span>
+            </Link>
           </div>
+
+          {/* ── HAMBURGER ── */}
+          <button
+            className={`nb-hamburger ${menuOpen ? "open" : ""}`}
+            onClick={() => setMenuOpen((p) => !p)}
+            aria-label="Toggle menu"
+          >
+            <span className="nb-bar" />
+            <span className="nb-bar" />
+            <span className="nb-bar" />
+          </button>
+
         </div>
       </nav>
 
-      {/* Mobile Menu */}
-      <div className={`mobile-menu ${menuOpen ? 'open' : ''}`}>
-        <Link to="/" className="mobile-nav-link">Home</Link>
-        {isAuthenticated ? (
-          <>
-            <Link to="/dashboard" className="mobile-nav-link">Dashboard</Link>
-            <Link to="/category" className="mobile-nav-link">Explore</Link>
-          </>
-        ) : null}
-        <div className="mobile-menu-actions">
-          <button className="nav-theme-btn" onClick={toggleTheme}>
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
-          {isAuthenticated ? (
-            <button className="nav-logout" onClick={handleSignOut}>Logout</button>
-          ) : (
-            <>
-              <Link to="/login" className="nav-btn-login">Login</Link>
-              <Link to="/register" className="nav-btn-register">Get Started</Link>
-            </>
-          )}
-        </div>
-      </div>
-    </>
-  )
-}
+      {/* ═══ MOBILE MENU ═══ */}
+      {menuOpen && (
+        <div className="nb-overlay open">
+          <div className="nb-backdrop" onClick={() => setMenuOpen(false)} />
 
-export default Navbar
+          <div className="nb-panel">
+
+            {/* Panel top */}
+            <div className="nb-panel-top">
+              <Link to="/" className="nb-panel-logo" onClick={() => setMenuOpen(false)}>
+                <div className="nb-panel-icon-wrap">
+                  <div className="nb-panel-icon-ring" />
+                  <div className="nb-panel-icon-mask" />
+                  <img src="/favicon.png" alt="RoutePilot" className="nb-panel-icon-img" />
+                </div>
+                <span className="nb-panel-logo-name">
+                  Route<span className="nb-panel-logo-pilot">Pilot</span>
+                </span>
+              </Link>
+              <button className="nb-panel-close" onClick={() => setMenuOpen(false)}>
+                ✕
+              </button>
+            </div>
+
+            {/* Nav links */}
+            <div className="nb-panel-section">Navigation</div>
+            <ul className="nb-panel-list">
+              {links.map((l) => {
+                const active = location.pathname === l.to;
+                return (
+                  <li key={l.to}>
+                    <Link
+                      to={l.to}
+                      className={`nb-panel-link ${active ? "active" : ""}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <div className="nb-panel-link-icon">{l.icon}</div>
+                      {l.label}
+                      <span className="nb-panel-link-chevron">›</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <div className="nb-panel-divider" />
+
+            {/* Theme */}
+            <div className="nb-panel-theme" onClick={toggleTheme}>
+              <span className="nb-panel-theme-label">
+                {theme === "dark" ? "🌙 Dark mode" : "☀️ Light mode"}
+              </span>
+              <div className={`nb-toggle ${theme === "light" ? "on" : ""}`}>
+                <div className="nb-toggle-thumb" />
+              </div>
+            </div>
+
+            <div className="nb-panel-divider" />
+
+            {/* Auth */}
+            <div className="nb-panel-section">Account</div>
+            <div className="nb-panel-auth">
+              <Link to="/login" className="nb-signin" onClick={() => setMenuOpen(false)}>
+                Sign in
+              </Link>
+              <Link to="/register" className="nb-start" onClick={() => setMenuOpen(false)}>
+                Get started <span className="arr">→</span>
+              </Link>
+            </div>
+
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default Navbar;
