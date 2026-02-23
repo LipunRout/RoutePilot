@@ -1,0 +1,35 @@
+{
+  "IT": [
+    { "id": "frontend", "title": "Frontend Developer", "icon": "💻", "desc": "HTML, CSS, JS, React" },
+    { "id": "backend", "title": "Backend Developer", "icon": "⚙️", "desc": "Node, Express, Databases" },
+    { "id": "fullstack", "title": "Full Stack Developer", "icon": "🚀", "desc": "Frontend + Backend" },
+    { "id": "data-analyst", "title": "Data Analyst", "icon": "📊", "desc": "Python, SQL, Excel, Power BI" },
+    { "id": "ai-engineer", "title": "AI / ML Engineer", "icon": "🤖", "desc": "ML, Deep Learning, LLMs" },
+    { "id": "devops", "title": "DevOps Engineer", "icon": "🔧", "desc": "Docker, CI/CD, Cloud" },
+    { "id": "cybersecurity", "title": "Cybersecurity Analyst", "icon": "🔒", "desc": "Ethical Hacking, Networks" },
+    { "id": "mobile", "title": "Mobile App Developer", "icon": "📱", "desc": "React Native, Flutter" },
+    { "id": "cloud", "title": "Cloud Engineer", "icon": "☁️", "desc": "AWS, Azure, GCP" },
+    { "id": "ui-ux", "title": "UI/UX Designer", "icon": "🎨", "desc": "Figma, Design Systems" }
+  ],
+  "Non-IT": [
+    { "id": "banking", "title": "Banking Officer", "icon": "🏦", "desc": "Finance, Banking Operations" },
+    { "id": "marketing", "title": "Digital Marketer", "icon": "📣", "desc": "SEO, Social Media, Ads" },
+    { "id": "content", "title": "Content Creator", "icon": "✍️", "desc": "Writing, Video, Branding" },
+    { "id": "hr", "title": "HR Manager", "icon": "👥", "desc": "Recruitment, People Management" },
+    { "id": "finance", "title": "Financial Analyst", "icon": "💰", "desc": "Accounting, Investments" },
+    { "id": "sales", "title": "Sales Manager", "icon": "🤝", "desc": "CRM, B2B, B2C Sales" }
+  ],
+  "Government": [
+    { "id": "upsc", "title": "UPSC / IAS Officer", "icon": "🏛️", "desc": "Civil Services Exam" },
+    { "id": "ssc", "title": "SSC / Railway Jobs", "icon": "🚂", "desc": "Government Exams" },
+    { "id": "banking-gov", "title": "Bank PO / Clerk", "icon": "🏧", "desc": "IBPS, SBI Exams" },
+    { "id": "defense", "title": "Defense Services", "icon": "🪖", "desc": "Army, Navy, Air Force" },
+    { "id": "teaching", "title": "Teacher / Professor", "icon": "📚", "desc": "NET, CTET, State TET" }
+  ],
+  "Business": [
+    { "id": "entrepreneur", "title": "Entrepreneur", "icon": "🏢", "desc": "Startup, Business Building" },
+    { "id": "product-manager", "title": "Product Manager", "icon": "📋", "desc": "Roadmaps, Agile, Strategy" },
+    { "id": "consultant", "title": "Business Consultant", "icon": "💼", "desc": "Strategy, Management" },
+    { "id": "ecommerce", "title": "E-Commerce Seller", "icon": "🛒", "desc": "Amazon, Flipkart, D2C" }
+  ]
+}
