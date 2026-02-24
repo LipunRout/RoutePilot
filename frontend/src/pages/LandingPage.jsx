@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
 
+
 const useInView = (threshold = 0.15) => {
   const ref = useRef(null)
   const [inView, setInView] = useState(false)
@@ -663,6 +664,14 @@ export default function LandingPage() {
           .chip-1, .chip-2 { display: none; }
           .cta-inner { padding: 40px 24px; }
           .hero-img { height: 240px; }
+                  .hero-typed {
+          font-size: 1.05rem;
+          font-weight: 600;
+          color: var(--primary);
+          min-width: 220px;
+          text-align: center;
+        }
+
         }
 
         @media (max-width: 480px) {

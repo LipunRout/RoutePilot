@@ -382,7 +382,7 @@ const PhaseCard = ({ phase, index }) => {
                 <p className="resources-title">📚 Resources</p>
                 <div className="resource-links">
                   {phase.articles?.map((link, i) => (
-                    
+                    <a
                       key={i}
                       href={link.url}
                       target="_blank"
@@ -393,7 +393,7 @@ const PhaseCard = ({ phase, index }) => {
                     </a>
                   ))}
                   {phase.youtube?.map((link, i) => (
-                    
+                    <a
                       key={i}
                       href={link.url}
                       target="_blank"
