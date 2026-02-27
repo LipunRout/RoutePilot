@@ -1,23 +1,18 @@
-require('dns').setDefaultResultOrder('ipv4first')
+const { Resend } = require('resend')
 require('dotenv').config()
-const nodemailer = require('nodemailer')
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  family: 4,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-})
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 const sendRoadmapEmail = async ({ to, name, roadmapTitle, pdfBuffer }) => {
-  await transporter.sendMail({
-    from:        `"RoutePilot" <${process.env.EMAIL_USER}>`,
+  const attachments = pdfBuffer ? [{
+    filename: `${roadmapTitle.replace(/\s+/g, '-')}-Roadmap.pdf`,
+    content:  pdfBuffer.toString('base64'),
+  }] : []
+
+  const { data, error } = await resend.emails.send({
+    from:    'RoutePilot <onboarding@resend.dev>',
     to,
-    subject:     `Your ${roadmapTitle} Roadmap — RoutePilot`,
+    subject: `Your ${roadmapTitle} Roadmap — RoutePilot`,
     html: `
       <div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;background:#0a0a0a;color:#e5e5e5;border-radius:14px;overflow:hidden;">
         <div style="padding:32px 32px 0;text-align:center;">
@@ -42,12 +37,11 @@ const sendRoadmapEmail = async ({ to, name, roadmapTitle, pdfBuffer }) => {
         </div>
       </div>
     `,
-    attachments: pdfBuffer ? [{
-      filename:    `${roadmapTitle.replace(/\s+/g, '-')}-Roadmap.pdf`,
-      content:     pdfBuffer,
-      contentType: 'application/pdf',
-    }] : [],
+    attachments,
   })
+
+  if (error) throw new Error(error.message)
+  return data
 }
 
-module.exports = { transporter, sendRoadmapEmail }
+module.exports = { sendRoadmapEmail }
