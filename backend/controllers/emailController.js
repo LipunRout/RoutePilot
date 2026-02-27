@@ -36,11 +36,33 @@ const sendPDFEmail = async (req, res) => {
     const userName = profile?.first_name || 'there'
     const email    = profile?.email || req.user.email
 
+    /* Merge roadmap_data with top-level fields so PDF has role/timeline */
+    const roadmapData = {
+      ...roadmapRow.roadmap_data,
+      role:        roadmapRow.roadmap_data?.role        || roadmapRow.role        || 'Career',
+      timeline:    roadmapRow.roadmap_data?.timeline    || roadmapRow.form_data?.timeline ? `${roadmapRow.form_data.timeline} months` : '6 months',
+      totalPhases: roadmapRow.roadmap_data?.totalPhases || roadmapRow.roadmap_data?.phases?.length || 5,
+      overview:    roadmapRow.roadmap_data?.overview    || '',
+      phases:      roadmapRow.roadmap_data?.phases      || [],
+    }
+
+    console.log('[email debug] role:', roadmapData.role)
+    console.log('[email debug] timeline:', roadmapData.timeline)
+    console.log('[email debug] phases:', roadmapData.phases?.length)
+    console.log('[email debug] email:', email)
+
     /* Generate PDF buffer */
-    const pdfBuffer = await generateRoadmapPDF(roadmapRow.roadmap_data, userName)
+    const pdfBuffer = await generateRoadmapPDF(roadmapData, userName)
+
+    console.log('[email debug] pdfBuffer:', pdfBuffer ? `${pdfBuffer.length} bytes` : 'UNDEFINED')
 
     /* Send email */
-    await sendRoadmapEmail({ to: email, name: userName, roadmapTitle: roadmapRow.role, pdfBuffer })
+    await sendRoadmapEmail({
+      to:           email,
+      name:         userName,
+      roadmapTitle: roadmapData.role,
+      pdfBuffer,
+    })
 
     res.json({ success: true, message: `PDF sent to ${email}` })
 
