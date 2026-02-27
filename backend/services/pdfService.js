@@ -13,7 +13,7 @@ const generateRoadmapPDF = async (roadmap, userName) => {
 
   await page.setContent(
     buildPDFHTML(roadmap, userName),
-    { waitUntil: 'networkidle0' }
+    { waitUntil: 'domcontentloaded', timeout: 0 }
   )
 
   const pdf = await page.pdf({
