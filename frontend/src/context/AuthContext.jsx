@@ -19,10 +19,15 @@ export const AuthProvider = ({ children }) => {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Clean up OAuth hash from URL after Google sign in
+      if (event === 'SIGNED_IN' && window.location.hash.includes('access_token')) {
+        window.history.replaceState(null, '', '/dashboard')
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -33,28 +38,20 @@ export const AuthProvider = ({ children }) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: metadata,
-      },
+      options: { data: metadata },
     });
-  
-    if (error) {
-      console.log("Supabase signup error:", error.message);
-      throw error;
-    }
-  
+    if (error) throw error;
     return data;
   };
+
   // Sign In
   const signIn = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-
-    if (error) throw error; // ← this MUST throw
+    if (error) throw error;
     if (!data.session) throw new Error("Login failed — no session returned");
-
     return data;
   };
 
@@ -71,9 +68,9 @@ export const AuthProvider = ({ children }) => {
       options: {
         redirectTo: window.location.origin + '/dashboard',
       },
-    })
-    if (error) throw error
-  }
+    });
+    if (error) throw error;
+  };
 
   const value = {
     user,
@@ -93,12 +90,9 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Custom hook
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used inside AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used inside AuthProvider");
   return context;
 };
 
