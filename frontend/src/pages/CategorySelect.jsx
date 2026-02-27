@@ -1,70 +1,82 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const CATEGORIES = [
   {
-    id: 'it',
-    label: 'IT & Technology',
-    cormorant: 'Technology',
-    icon: '💻',
-    desc: 'Software development, data science, cloud, cybersecurity and more.',
-    color: '#00c97a',
-    glow: 'rgba(0,201,122,0.12)',
-    border: 'rgba(0,201,122,0.25)',
-    roles: ['Frontend Dev', 'Backend Dev', 'Data Analyst', 'DevOps', 'AI Engineer'],
+    id: "it",
+    label: "IT & Technology",
+    cormorant: "Technology",
+    icon: "💻",
+    desc: "Software development, data science, cloud, cybersecurity and more.",
+    color: "#00c97a",
+    glow: "rgba(0,201,122,0.12)",
+    border: "rgba(0,201,122,0.25)",
+    roles: [
+      "Frontend Dev",
+      "Backend Dev",
+      "Data Analyst",
+      "DevOps",
+      "AI Engineer",
+    ],
     count: 12,
   },
   {
-    id: 'nonit',
-    label: 'Non-IT Careers',
-    cormorant: 'Careers',
-    icon: '📊',
-    desc: 'Banking, marketing, HR, finance, content writing and more.',
-    color: '#0ea5e9',
-    glow: 'rgba(14,165,233,0.12)',
-    border: 'rgba(14,165,233,0.25)',
-    roles: ['Banking', 'Marketing', 'HR Manager', 'Content Writer', 'Finance'],
+    id: "nonit",
+    label: "Non-IT Careers",
+    cormorant: "Careers",
+    icon: "📊",
+    desc: "Banking, marketing, HR, finance, content writing and more.",
+    color: "#0ea5e9",
+    glow: "rgba(14,165,233,0.12)",
+    border: "rgba(14,165,233,0.25)",
+    roles: ["Banking", "Marketing", "HR Manager", "Content Writer", "Finance"],
     count: 8,
   },
   {
-    id: 'govt',
-    label: 'Government Jobs',
-    cormorant: 'Government',
-    icon: '🏛️',
-    desc: 'UPSC, SSC, Bank PO, Defence, Teaching and state exams.',
-    color: '#f59e0b',
-    glow: 'rgba(245,158,11,0.12)',
-    border: 'rgba(245,158,11,0.25)',
-    roles: ['UPSC IAS', 'SSC CGL', 'Bank PO', 'Defence', 'Teaching'],
+    id: "govt",
+    label: "Government Jobs",
+    cormorant: "Government",
+    icon: "🏛️",
+    desc: "UPSC, SSC, Bank PO, Defence, Teaching and state exams.",
+    color: "#f59e0b",
+    glow: "rgba(245,158,11,0.12)",
+    border: "rgba(245,158,11,0.25)",
+    roles: ["UPSC IAS", "SSC CGL", "Bank PO", "Defence", "Teaching"],
     count: 7,
   },
   {
-    id: 'business',
-    label: 'Business & Entrepreneurship',
-    cormorant: 'Entrepreneurship',
-    icon: '🚀',
-    desc: 'Startups, product management, consulting, e-commerce and more.',
-    color: '#a855f7',
-    glow: 'rgba(168,85,247,0.12)',
-    border: 'rgba(168,85,247,0.25)',
-    roles: ['Entrepreneur', 'Product Manager', 'Consultant', 'E-Commerce', 'VC Analyst'],
+    id: "business",
+    label: "Business & Entrepreneurship",
+    cormorant: "Entrepreneurship",
+    icon: "🚀",
+    desc: "Startups, product management, consulting, e-commerce and more.",
+    color: "#a855f7",
+    glow: "rgba(168,85,247,0.12)",
+    border: "rgba(168,85,247,0.25)",
+    roles: [
+      "Entrepreneur",
+      "Product Manager",
+      "Consultant",
+      "E-Commerce",
+      "VC Analyst",
+    ],
     count: 6,
   },
-]
+];
 
 export default function CategorySelect() {
-  const [hovered, setHovered]   = useState(null)
-  const [selected, setSelected] = useState(null)
-  const [leaving, setLeaving]   = useState(false)
-  const navigate = useNavigate()
+  const [hovered, setHovered] = useState(null);
+  const [selected, setSelected] = useState(null);
+  const [leaving, setLeaving] = useState(false);
+  const navigate = useNavigate();
 
   const pick = (id) => {
-    setSelected(id)
-    setLeaving(true)
-    setTimeout(() => navigate(`/roles?category=${id}`), 500)
-  }
+    setSelected(id);
+    setLeaving(true);
+    setTimeout(() => navigate(`/roles?category=${id}`), 500);
+  };
 
   return (
     <>
@@ -435,7 +447,6 @@ export default function CategorySelect() {
           <div className="cs-radial" />
 
           <div className="cs-inner">
-
             {/* ── HEADER ── */}
             <header className="cs-header">
               <div className="cs-eyebrow">
@@ -455,22 +466,27 @@ export default function CategorySelect() {
             {/* ── GRID ── */}
             <div
               className="cs-grid"
-              style={{ opacity: leaving ? 0 : 1, transition: 'opacity 0.4s ease' }}
+              style={{
+                opacity: leaving ? 0 : 1,
+                transition: "opacity 0.4s ease",
+              }}
             >
               {CATEGORIES.map((cat, i) => (
                 <div
                   key={cat.id}
-                  className={`cs-card ${selected === cat.id ? 'selected' : ''}`}
+                  className={`cs-card ${selected === cat.id ? "selected" : ""}`}
                   style={{
                     animationDelay: `${0.2 + i * 0.08}s`,
-                    color: hovered === cat.id ? cat.color : 'inherit',
+                    color: hovered === cat.id ? cat.color : "inherit",
                     borderColor: hovered === cat.id ? cat.border : undefined,
-                    boxShadow: hovered === cat.id
-                      ? `0 24px 64px rgba(0,0,0,0.25), 0 0 0 1px ${cat.border}, inset 0 1px 0 ${cat.border}`
-                      : undefined,
-                    background: hovered === cat.id
-                      ? `linear-gradient(145deg, var(--bg-2), var(--bg-1))`
-                      : undefined,
+                    boxShadow:
+                      hovered === cat.id
+                        ? `0 24px 64px rgba(0,0,0,0.25), 0 0 0 1px ${cat.border}, inset 0 1px 0 ${cat.border}`
+                        : undefined,
+                    background:
+                      hovered === cat.id
+                        ? `linear-gradient(145deg, var(--bg-2), var(--bg-1))`
+                        : undefined,
                   }}
                   onMouseEnter={() => setHovered(cat.id)}
                   onMouseLeave={() => setHovered(null)}
@@ -478,20 +494,25 @@ export default function CategorySelect() {
                 >
                   {/* Hover glow */}
                   {hovered === cat.id && (
-                    <div style={{
-                      position: 'absolute', inset: 0,
-                      background: `radial-gradient(ellipse 60% 40% at 30% 30%, ${cat.glow}, transparent)`,
-                      borderRadius: '18px',
-                      pointerEvents: 'none',
-                    }} />
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        background: `radial-gradient(ellipse 60% 40% at 30% 30%, ${cat.glow}, transparent)`,
+                        borderRadius: "18px",
+                        pointerEvents: "none",
+                      }}
+                    />
                   )}
 
                   <div className="cs-card-top">
                     <div
                       className="cs-card-icon-wrap"
                       style={{
-                        background: hovered === cat.id ? cat.glow : 'var(--bg-2)',
-                        borderColor: hovered === cat.id ? cat.border : 'var(--border)',
+                        background:
+                          hovered === cat.id ? cat.glow : "var(--bg-2)",
+                        borderColor:
+                          hovered === cat.id ? cat.border : "var(--border)",
                       }}
                     >
                       {cat.icon}
@@ -499,9 +520,11 @@ export default function CategorySelect() {
                     <div
                       className="cs-card-badge"
                       style={{
-                        color: hovered === cat.id ? cat.color : 'var(--text-3)',
-                        borderColor: hovered === cat.id ? cat.border : 'var(--border)',
-                        background: hovered === cat.id ? cat.glow : 'transparent',
+                        color: hovered === cat.id ? cat.color : "var(--text-3)",
+                        borderColor:
+                          hovered === cat.id ? cat.border : "var(--border)",
+                        background:
+                          hovered === cat.id ? cat.glow : "transparent",
                       }}
                     >
                       {cat.count} roles
@@ -510,11 +533,13 @@ export default function CategorySelect() {
 
                   <div className="cs-card-title">
                     <span className="cs-card-title-main">
-                      {cat.label.split(' ').slice(0, -1).join(' ')}
+                      {cat.label.split(" ").slice(0, -1).join(" ")}
                     </span>
                     <span
                       className="cs-card-title-accent"
-                      style={{ color: hovered === cat.id ? cat.color : 'var(--text-2)' }}
+                      style={{
+                        color: hovered === cat.id ? cat.color : "var(--text-2)",
+                      }}
                     >
                       {cat.cormorant}
                     </span>
@@ -523,8 +548,10 @@ export default function CategorySelect() {
                   <p className="cs-card-desc">{cat.desc}</p>
 
                   <div className="cs-roles">
-                    {cat.roles.map(r => (
-                      <span key={r} className="cs-role-pill">{r}</span>
+                    {cat.roles.map((r) => (
+                      <span key={r} className="cs-role-pill">
+                        {r}
+                      </span>
                     ))}
                   </div>
 
@@ -535,7 +562,8 @@ export default function CategorySelect() {
                     <div
                       className="cs-card-arrow"
                       style={{
-                        borderColor: hovered === cat.id ? cat.border : undefined,
+                        borderColor:
+                          hovered === cat.id ? cat.border : undefined,
                         color: hovered === cat.id ? cat.color : undefined,
                         background: hovered === cat.id ? cat.glow : undefined,
                       }}
@@ -550,28 +578,40 @@ export default function CategorySelect() {
             {/* ── BOTTOM INFO BAR ── */}
             <div className="cs-bottom">
               {[
-                { icon: '⚡', title: 'Instant generation', desc: 'Roadmap ready in under 30 seconds' },
-                { icon: '◎', title: 'Fully personalized', desc: 'Based on your level & timeline' },
-                { icon: '✉', title: 'PDF to your inbox', desc: 'Export and keep your roadmap' },
+                {
+                  icon: "⚡",
+                  title: "Instant generation",
+                  desc: "Roadmap ready in under 30 seconds",
+                },
+                {
+                  icon: "◎",
+                  title: "Fully personalized",
+                  desc: "Based on your level & timeline",
+                },
+                {
+                  icon: "✉",
+                  title: "PDF to your inbox",
+                  desc: "Export and keep your roadmap",
+                },
               ].map((item, i) => (
-                <>
-                  <div className="cs-bottom-item" key={item.title}>
+                <div key={item.title} style={{ display: "contents" }}>
+                  <div className="cs-bottom-item">
                     <div className="cs-bottom-icon">{item.icon}</div>
                     <div className="cs-bottom-text">
                       <strong>{item.title}</strong>
                       {item.desc}
                     </div>
                   </div>
-                  {i < 2 && <div className="cs-bottom-divider" key={`d-${i}`} />}
-                </>
+
+                  {i < 2 && <div className="cs-bottom-divider" />}
+                </div>
               ))}
             </div>
-
           </div>
         </main>
 
         <Footer />
       </div>
     </>
-  )
+  );
 }

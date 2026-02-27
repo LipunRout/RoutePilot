@@ -34,14 +34,17 @@ export const AuthProvider = ({ children }) => {
       email,
       password,
       options: {
-        data: metadata, // ← passes first_name, last_name to trigger
+        data: metadata,
       },
     });
-
-    if (error) throw error;
+  
+    if (error) {
+      console.log("Supabase signup error:", error.message);
+      throw error;
+    }
+  
     return data;
   };
-
   // Sign In
   const signIn = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -63,15 +66,14 @@ export const AuthProvider = ({ children }) => {
 
   // Google OAuth
   const signInWithGoogle = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: window.location.origin + '/dashboard',
       },
-    });
-    if (error) throw error;
-    return data;
-  };
+    })
+    if (error) throw error
+  }
 
   const value = {
     user,

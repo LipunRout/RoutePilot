@@ -85,14 +85,19 @@ export default function RoadmapPage() {
   const pct            = totalPhases ? Math.round((completedCount / totalPhases) * 100) : 0
 
   const handleEmail = async () => {
+    console.log("Email clicked. ID:", id)
+  
     try {
-      await emailRoadmapPDF(id)
+      const res = await emailRoadmapPDF(id)
+      console.log("Email success:", res)
+  
       setEmail(true)
       setTimeout(() => setEmail(false), 3000)
+  
     } catch (e) {
-      console.error(e)
-      setEmail(true)
-      setTimeout(() => setEmail(false), 3000)
+      console.error("Email failed:", e.response?.data || e.message)
+  
+      alert("Email failed. Check console.")
     }
   }
 
