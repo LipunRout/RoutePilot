@@ -10,28 +10,29 @@ dotenv.config()
 const app  = express()
 const PORT = process.env.PORT || 5000
 
-/* ── Middleware ── */
-const corsOptions = {
-    origin: function(origin, callback) {
-      const allowed = [
-        'http://localhost:5173',
-        'http://localhost:5174',
-        process.env.FRONTEND_URL,
-      ].filter(Boolean)
-      if (!origin || allowed.includes(origin)) {
-        callback(null, true)
-      } else {
-        callback(new Error('Not allowed by CORS'))
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  }
-  
-  app.use(cors(corsOptions))
-  app.use(express.json({ limit: '10mb' }))
-  
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  process.env.FRONTEND_URL,
+].filter(Boolean)
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true)
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true)
+    }
+
+    console.log('❌ Blocked by CORS:', origin)
+    return callback(new Error('Not allowed by CORS'))
+  },
+  credentials: true,
+}))
+
+// ✅ Express 5 compatible preflight
+app.options(/.*/, cors())
+
 app.use(express.json({ limit: '10mb' }))
 
 /* ── Routes ── */
