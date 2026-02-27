@@ -20,7 +20,8 @@
     "nodemailer": "^8.0.1",
     "pdfkit": "^0.17.2",
     "puppeteer-core": "^24.37.5",
-    "resend": "^6.9.2"
+    "resend": "^6.9.2",
+    "sib-api-v3-sdk": "^8.5.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
