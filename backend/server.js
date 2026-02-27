@@ -10,42 +10,45 @@ dotenv.config()
 const app  = express()
 const PORT = process.env.PORT || 5000
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:5174',
-  process.env.FRONTEND_URL,
-].filter(Boolean)
-
-app.use(cors({
+/* ───────── CORS CONFIG ───────── */
+const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true)
+    const allowed = [
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'https://route-pilot.vercel.app',
+      'https://routepilot.vercel.app',
+      process.env.FRONTEND_URL,
+    ].filter(Boolean)
 
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true)
+    if (!origin || allowed.includes(origin)) {
+      callback(null, true)
+    } else {
+      console.log('❌ Blocked by CORS:', origin)
+      callback(new Error('Not allowed by CORS'))
     }
-
-    console.log('❌ Blocked by CORS:', origin)
-    return callback(new Error('Not allowed by CORS'))
   },
   credentials: true,
-}))
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}
 
-// ✅ Express 5 compatible preflight
-app.options(/.*/, cors())
+app.use(cors(corsOptions))
+app.options(/.*/, cors(corsOptions)) // Express 5 preflight support
 
 app.use(express.json({ limit: '10mb' }))
 
-/* ── Routes ── */
+/* ───────── Routes ───────── */
 app.use('/api', roadmapRoutes)
 app.use('/api', emailRoutes)
 app.use('/api', callRoutes)
 
-/* ── Health check ── */
+/* ───────── Health Check ───────── */
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: 'RoutePilot API' })
 })
 
-/* ── Global error handler ── */
+/* ───────── Global Error Handler ───────── */
 app.use((err, _req, res, _next) => {
   console.error('[ERROR]', err.message)
   res.status(err.status || 500).json({
@@ -55,5 +58,5 @@ app.use((err, _req, res, _next) => {
 })
 
 app.listen(PORT, () => {
-  console.log(`🚀 RoutePilot backend running on http://localhost:${PORT}`)
+  console.log(`🚀 RoutePilot backend running on port ${PORT}`)
 })
