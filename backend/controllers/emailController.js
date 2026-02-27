@@ -40,7 +40,7 @@ const sendPDFEmail = async (req, res) => {
     const pdfBuffer = await generateRoadmapPDF(roadmapRow.roadmap_data, userName)
 
     /* Send email */
-    await sendRoadmapEmail({ to: email, userName, role: roadmapRow.role, pdfBuffer })
+    await sendRoadmapEmail({ to: email, name: userName, roadmapTitle: roadmapRow.role, pdfBuffer })
 
     res.json({ success: true, message: `PDF sent to ${email}` })
 
