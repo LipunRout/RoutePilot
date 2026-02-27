@@ -34,7 +34,7 @@ const sendPDFEmail = async (req, res) => {
       .single()
 
     const userName = profile?.first_name || 'there'
-    const email    = profile?.email || req.user.email
+    const email = process.env.EMAIL_USER
 
     /* Merge roadmap_data with top-level fields so PDF has role/timeline */
     const roadmapData = {
