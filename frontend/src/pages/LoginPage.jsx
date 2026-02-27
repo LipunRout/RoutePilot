@@ -1,22 +1,49 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ email: '', password: '' })
-  const [showPass, setShowPass] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [focused, setFocused] = useState(null)
+  const { signIn, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
 
-  const handle = (e) => setForm(p => ({ ...p, [e.target.name]: e.target.value }))
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [focused, setFocused] = useState(null);
 
-  const submit = (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setTimeout(() => setLoading(false), 2000)
-  }
+  const handle = (e) =>
+    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+  const submit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
+    try {
+      await signIn(form.email, form.password);
+      navigate("/dashboard");
+    } catch (err) {
+      // Show the actual Supabase error message
+      if (err.message.includes("Invalid login credentials")) {
+        setError("Wrong email or password. Please try again.");
+      } else if (err.message.includes("Email not confirmed")) {
+        setError("Please confirm your email before signing in.");
+      } else {
+        setError(err.message || "Sign in failed. Please try again.");
+      }
+      setLoading(false);
+    }
+  };
+
+  const handleGoogle = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
   return (
     <>
       <style>{`
@@ -604,14 +631,12 @@ export default function LoginPage() {
         <Navbar />
 
         <div className="lp-main">
-
           {/* ══ LEFT PANEL ══ */}
           <div className="lp-left">
             <div className="lp-left-grid" />
             <div className="lp-left-orb" />
 
             <div className="lp-left-content">
-
               {/* Brand */}
               <div className="lp-brand">
                 <div className="lp-brand-icon">
@@ -629,16 +654,28 @@ export default function LoginPage() {
               </div>
 
               <p className="lp-sub">
-                Sign in to access your personalized AI roadmap, track your
+                Log in to access your personalized AI roadmap, track your
                 progress and continue building the career you deserve.
               </p>
 
               {/* Features */}
               <div className="lp-features">
                 {[
-                  { icon: '⚡', title: 'AI-Generated Roadmaps', desc: 'Structured, phase-by-phase plans built for your goals.' },
-                  { icon: '◎', title: '25+ Career Paths', desc: 'IT, Non-IT, Government and Business covered.' },
-                  { icon: '✉', title: 'PDF Export', desc: 'Get your full roadmap delivered to your inbox.' },
+                  {
+                    icon: "⚡",
+                    title: "AI-Generated Roadmaps",
+                    desc: "Structured, phase-by-phase plans built for your goals.",
+                  },
+                  {
+                    icon: "◎",
+                    title: "25+ Career Paths",
+                    desc: "IT, Non-IT, Government and Business covered.",
+                  },
+                  {
+                    icon: "✉",
+                    title: "PDF Export",
+                    desc: "Get your full roadmap delivered to your inbox.",
+                  },
                 ].map((f, i) => (
                   <div className="lp-feature" key={i}>
                     <div className="lp-feature-icon">{f.icon}</div>
@@ -664,7 +701,6 @@ export default function LoginPage() {
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
 
@@ -673,24 +709,30 @@ export default function LoginPage() {
             <div className="lp-right-orb" />
 
             <div className="lp-form-wrap">
-
               {/* Header */}
               <div className="lp-form-header">
                 <div className="lp-form-eyebrow">Welcome back</div>
                 <div className="lp-form-title">
-                  Sign in to{' '}
+                  Log in to{" "}
                   <span className="lp-form-title-accent">RoutePilot</span>
                 </div>
                 <div className="lp-form-sub">
-                  Don't have an account?{' '}
-                  <Link to="/register" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 500 }}>
+                  Don't have an account?{" "}
+                  <Link
+                    to="/register"
+                    style={{
+                      color: "var(--primary)",
+                      textDecoration: "none",
+                      fontWeight: 500,
+                    }}
+                  >
                     Create one free →
                   </Link>
                 </div>
               </div>
 
               {/* Google OAuth */}
-              <button className="lp-google-btn">
+              <button className="lp-google-btn" onClick={handleGoogle}>
                 <span className="lp-google-icon">G</span>
                 Continue with Google
               </button>
@@ -704,11 +746,14 @@ export default function LoginPage() {
 
               {/* Form */}
               <form className="lp-form" onSubmit={submit}>
-
                 {/* Email */}
                 <div className="lp-field">
                   <label className="lp-label">Email address</label>
-                  <div className={`lp-input-wrap ${focused === 'email' ? 'focused' : ''}`}>
+                  <div
+                    className={`lp-input-wrap ${
+                      focused === "email" ? "focused" : ""
+                    }`}
+                  >
                     <input
                       type="email"
                       name="email"
@@ -716,7 +761,7 @@ export default function LoginPage() {
                       placeholder="you@example.com"
                       value={form.email}
                       onChange={handle}
-                      onFocus={() => setFocused('email')}
+                      onFocus={() => setFocused("email")}
                       onBlur={() => setFocused(null)}
                       required
                     />
@@ -726,24 +771,28 @@ export default function LoginPage() {
                 {/* Password */}
                 <div className="lp-field">
                   <label className="lp-label">Password</label>
-                  <div className={`lp-input-wrap ${focused === 'password' ? 'focused' : ''}`}>
+                  <div
+                    className={`lp-input-wrap ${
+                      focused === "password" ? "focused" : ""
+                    }`}
+                  >
                     <input
-                      type={showPass ? 'text' : 'password'}
+                      type={showPass ? "text" : "password"}
                       name="password"
                       className="lp-input has-icon"
                       placeholder="Enter your password"
                       value={form.password}
                       onChange={handle}
-                      onFocus={() => setFocused('password')}
+                      onFocus={() => setFocused("password")}
                       onBlur={() => setFocused(null)}
                       required
                     />
                     <button
                       type="button"
                       className="lp-pass-toggle"
-                      onClick={() => setShowPass(p => !p)}
+                      onClick={() => setShowPass((p) => !p)}
                     >
-                      {showPass ? 'Hide' : 'Show'}
+                      {showPass ? "Hide" : "Show"}
                     </button>
                   </div>
                 </div>
@@ -752,41 +801,53 @@ export default function LoginPage() {
                 <div className="lp-forgot">
                   <a href="#">Forgot password?</a>
                 </div>
+                {error && (
+                  <div
+                    style={{
+                      padding: "10px 14px",
+                      background: "rgba(239,68,68,0.1)",
+                      border: "1px solid rgba(239,68,68,0.3)",
+                      borderRadius: 8,
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: "0.82rem",
+                      color: "#ef4444",
+                    }}
+                  >
+                    ⚠️ {error}
+                  </div>
+                )}
 
                 {/* Submit */}
-                <button
-                  type="submit"
-                  className="lp-submit"
-                  disabled={loading}
-                >
-                  {loading
-                    ? <><div className="lp-spinner" /> Signing in...</>
-                    : <>Sign in <span>→</span></>
-                  }
+                <button type="submit" className="lp-submit" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <div className="lp-spinner" /> Signing in...
+                    </>
+                  ) : (
+                    <>
+                      Sign in <span>→</span>
+                    </>
+                  )}
                 </button>
-
               </form>
 
               {/* Register */}
               <div className="lp-register-link">
-                New to RoutePilot?{' '}
+                New to RoutePilot?{" "}
                 <Link to="/register">Create a free account</Link>
               </div>
 
               {/* Terms */}
               <div className="lp-terms">
-                By signing in you agree to our{' '}
-                <a href="#">Terms of Service</a> and{' '}
-                <a href="#">Privacy Policy</a>
+                By signing in you agree to our <a href="#">Terms of Service</a>{" "}
+                and <a href="#">Privacy Policy</a>
               </div>
-
             </div>
           </div>
-
         </div>
 
         <Footer />
       </div>
     </>
-  )
+  );
 }

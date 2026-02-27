@@ -14,25 +14,29 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => { setMenuOpen(false); }, [location]);
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location]);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [menuOpen]);
 
   const links = [
-    { to: "/",          label: "Home",      icon: "⌂" },
-    { to: "/category",  label: "Explore",   icon: "◎" },
+    { to: "/", label: "Home", icon: "⌂" },
+    { to: "/category", label: "Explore", icon: "◎" },
     { to: "/dashboard", label: "Dashboard", icon: "▤" },
-    { to: "/roadmap",   label: "Roadmap",   icon: "◈" },
+    { to: "/roadmap", label: "Roadmap", icon: "◈" },
   ];
 
   return (
     <>
       <style>{`
       /* ── GOOGLE FONTS ── */
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:ital,wght@1,500;1,600&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:ital,wght@1,500;1,600&display=swap');
 
   /* ── GLOBAL FONT (Inter) ── */
   .lp {
@@ -681,14 +685,17 @@ const Navbar = () => {
       {/* ═══ NAVBAR ═══ */}
       <nav className={`nb ${scrolled ? "scrolled" : ""}`}>
         <div className="nb-inner">
-
           {/* ── LOGO ── */}
           <Link to="/" className="nb-logo">
             <div className="nb-logo-icon-wrap">
               <div className="nb-logo-glow" />
               <div className="nb-logo-ring" />
               <div className="nb-logo-ring-mask" />
-              <img src="/favicon.png" alt="RoutePilot" className="nb-logo-img" />
+              <img
+                src="/favicon.png"
+                alt="RoutePilot"
+                className="nb-logo-img"
+              />
             </div>
             <div className="nb-logo-text-wrap">
               <div className="nb-logo-name">
@@ -705,9 +712,15 @@ const Navbar = () => {
             {links.map((l) => {
               const active = location.pathname === l.to;
               return (
-                <li key={l.to} className={`nb-link-item ${active ? "active" : ""}`}>
+                <li
+                  key={l.to}
+                  className={`nb-link-item ${active ? "active" : ""}`}
+                >
                   <div className="nb-link-bg" />
-                  <Link to={l.to} className={`nb-link ${active ? "active" : ""}`}>
+                  <Link
+                    to={l.to}
+                    className={`nb-link ${active ? "active" : ""}`}
+                  >
                     {l.label}
                   </Link>
                   <div className="nb-link-dot" />
@@ -718,12 +731,18 @@ const Navbar = () => {
 
           {/* ── DESKTOP ACTIONS ── */}
           <div className="nb-actions">
-            <button className="nb-theme" onClick={toggleTheme} title="Toggle theme">
+            <button
+              className="nb-theme"
+              onClick={toggleTheme}
+              title="Toggle theme"
+            >
               {theme === "dark" ? "☀" : "☽"}
             </button>
-            <Link to="/login" className="nb-signin">Sign in</Link>
+            <Link to="/login" className="nb-signin">
+              Log in
+            </Link>
             <Link to="/register" className="nb-start">
-              Get started <span className="arr">→</span>
+              Create Account <span className="arr">→</span>
             </Link>
           </div>
 
@@ -737,7 +756,6 @@ const Navbar = () => {
             <span className="nb-bar" />
             <span className="nb-bar" />
           </button>
-
         </div>
       </nav>
 
@@ -747,20 +765,30 @@ const Navbar = () => {
           <div className="nb-backdrop" onClick={() => setMenuOpen(false)} />
 
           <div className="nb-panel">
-
             {/* Panel top */}
             <div className="nb-panel-top">
-              <Link to="/" className="nb-panel-logo" onClick={() => setMenuOpen(false)}>
+              <Link
+                to="/"
+                className="nb-panel-logo"
+                onClick={() => setMenuOpen(false)}
+              >
                 <div className="nb-panel-icon-wrap">
                   <div className="nb-panel-icon-ring" />
                   <div className="nb-panel-icon-mask" />
-                  <img src="/favicon.png" alt="RoutePilot" className="nb-panel-icon-img" />
+                  <img
+                    src="/favicon.png"
+                    alt="RoutePilot"
+                    className="nb-panel-icon-img"
+                  />
                 </div>
                 <span className="nb-panel-logo-name">
                   Route<span className="nb-panel-logo-pilot">Pilot</span>
                 </span>
               </Link>
-              <button className="nb-panel-close" onClick={() => setMenuOpen(false)}>
+              <button
+                className="nb-panel-close"
+                onClick={() => setMenuOpen(false)}
+              >
                 ✕
               </button>
             </div>
@@ -803,14 +831,21 @@ const Navbar = () => {
             {/* Auth */}
             <div className="nb-panel-section">Account</div>
             <div className="nb-panel-auth">
-              <Link to="/login" className="nb-signin" onClick={() => setMenuOpen(false)}>
+              <Link
+                to="/login"
+                className="nb-signin"
+                onClick={() => setMenuOpen(false)}
+              >
                 Sign in
               </Link>
-              <Link to="/register" className="nb-start" onClick={() => setMenuOpen(false)}>
+              <Link
+                to="/register"
+                className="nb-start"
+                onClick={() => setMenuOpen(false)}
+              >
                 Get started <span className="arr">→</span>
               </Link>
             </div>
-
           </div>
         </div>
       )}

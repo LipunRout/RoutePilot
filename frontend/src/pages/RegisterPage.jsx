@@ -1,52 +1,88 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { useAuth } from "../context/AuthContext";
 
 export default function RegisterPage() {
-  const [step, setStep]       = useState(1)
-  const [loading, setLoading] = useState(false)
-  const [showPass, setShowPass] = useState(false)
-  const [focused, setFocused] = useState(null)
-  const [form, setForm] = useState({
-    firstName: '', lastName: '', email: '',
-    password: '', confirmPassword: '', goal: ''
-  })
+  const { signUp, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
 
-  const handle = (e) => setForm(p => ({ ...p, [e.target.name]: e.target.value }))
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [focused, setFocused] = useState(null);
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    goal: "",
+    targetRole: "",
+  });
+
+  const handle = (e) =>
+    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
   const nextStep = (e) => {
-    e.preventDefault()
-    setStep(2)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+    e.preventDefault();
+    if (form.password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+    setError("");
+    setStep(2);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
-  const submit = (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setTimeout(() => setLoading(false), 2000)
-  }
+  const submit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      await signUp(form.email, form.password, {
+        first_name: form.firstName,
+        last_name: form.lastName,
+      });
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message || "Registration failed. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  const handleGoogle = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   const strength = (() => {
-    const p = form.password
-    if (!p) return 0
-    let s = 0
-    if (p.length >= 8)          s++
-    if (/[A-Z]/.test(p))        s++
-    if (/[0-9]/.test(p))        s++
-    if (/[^A-Za-z0-9]/.test(p)) s++
-    return s
-  })()
+    const p = form.password;
+    if (!p) return 0;
+    let s = 0;
+    if (p.length >= 8) s++;
+    if (/[A-Z]/.test(p)) s++;
+    if (/[0-9]/.test(p)) s++;
+    if (/[^A-Za-z0-9]/.test(p)) s++;
+    return s;
+  })();
 
-  const strengthLabel = ['', 'Weak', 'Fair', 'Good', 'Strong'][strength]
-  const strengthColor = ['', '#ef4444', '#f59e0b', '#3b82f6', '#00c97a'][strength]
+  const strengthLabel = ["", "Weak", "Fair", "Good", "Strong"][strength];
+  const strengthColor = ["", "#ef4444", "#f59e0b", "#3b82f6", "#00c97a"][
+    strength
+  ];
 
   const goals = [
-    { value: 'it',    label: 'IT & Tech',      icon: '💻' },
-    { value: 'nonit', label: 'Non-IT Career',  icon: '📊' },
-    { value: 'govt',  label: 'Government Job', icon: '🏛️' },
-    { value: 'biz',   label: 'Business',       icon: '🚀' },
-  ]
+    { value: "it", label: "IT & Tech", icon: "💻" },
+    { value: "nonit", label: "Non-IT Career", icon: "📊" },
+    { value: "govt", label: "Government Job", icon: "🏛️" },
+    { value: "biz", label: "Business", icon: "🚀" },
+  ];
 
   return (
     <>
@@ -763,7 +799,6 @@ export default function RegisterPage() {
         <Navbar />
 
         <div className="rp-main">
-
           {/* ══ LEFT PANEL ══ */}
           <div className="rp-left">
             <div className="rp-left-grid" />
@@ -771,7 +806,6 @@ export default function RegisterPage() {
             <div className="rp-left-orb2" />
 
             <div className="rp-left-content">
-
               <div className="rp-brand">
                 <div className="rp-brand-icon">
                   <img src="/favicon.png" alt="RoutePilot" />
@@ -794,22 +828,31 @@ export default function RegisterPage() {
               {/* Steps indicator */}
               <div className="rp-steps-indicator">
                 {[
-                  { n: '1', title: 'Your account',  desc: 'Name, email & password' },
-                  { n: '2', title: 'Your goal',     desc: 'Pick your career domain' },
-                  { n: '3', title: 'Get roadmap',   desc: 'AI builds your path' },
+                  {
+                    n: "1",
+                    title: "Your account",
+                    desc: "Name, email & password",
+                  },
+                  {
+                    n: "2",
+                    title: "Your goal",
+                    desc: "Pick your career domain",
+                  },
+                  { n: "3", title: "Get roadmap", desc: "AI builds your path" },
                 ].map((s, i) => {
-                  const st = i + 1 < step ? 'done' : i + 1 === step ? 'current' : ''
+                  const st =
+                    i + 1 < step ? "done" : i + 1 === step ? "current" : "";
                   return (
                     <div key={i} className={`rp-step-item ${st}`}>
                       <div className="rp-step-num">
-                        {i + 1 < step ? '✓' : s.n}
+                        {i + 1 < step ? "✓" : s.n}
                       </div>
                       <div>
                         <div className="rp-step-text-title">{s.title}</div>
                         <div className="rp-step-text-desc">{s.desc}</div>
                       </div>
                     </div>
-                  )
+                  );
                 })}
               </div>
 
@@ -826,7 +869,6 @@ export default function RegisterPage() {
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
 
@@ -835,12 +877,11 @@ export default function RegisterPage() {
             <div className="rp-right-orb" />
 
             <div className="rp-form-wrap">
-
               {/* Progress bar */}
               <div className="rp-progress">
                 <div className="rp-progress-top">
                   <span className="rp-progress-label">
-                    {step === 1 ? 'Account details' : 'Career goal'}
+                    {step === 1 ? "Account details" : "Career goal"}
                   </span>
                   <span className="rp-progress-step">Step {step} of 2</span>
                 </div>
@@ -855,35 +896,42 @@ export default function RegisterPage() {
               {/* ── STEP 1 ── */}
               {step === 1 && (
                 <div className="rp-step-panel">
-
                   <div className="rp-form-header">
                     <div className="rp-form-eyebrow">Create account</div>
                     <div className="rp-form-title">
-                      Join{' '}
+                      Join{" "}
                       <span className="rp-form-title-accent">RoutePilot</span>
                     </div>
                     <div className="rp-form-sub">
-                      Already have an account?{' '}
-                      <Link to="/login" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 500 }}>
+                      Already have an account?{" "}
+                      <Link
+                        to="/login"
+                        style={{
+                          color: "var(--primary)",
+                          textDecoration: "none",
+                          fontWeight: 500,
+                        }}
+                      >
                         Sign in →
                       </Link>
                     </div>
                   </div>
 
                   {/* Google */}
-                  <button className="rp-google-btn">
-                    <span style={{ fontWeight: 700, fontSize: '1rem' }}>G</span>
+                  <button className="rp-google-btn" onClick={handleGoogle}>
+                    <span style={{ fontWeight: 700, fontSize: "1rem" }}>G</span>
                     Continue with Google
                   </button>
 
                   <div className="rp-divider">
                     <div className="rp-divider-line" />
-                    <span className="rp-divider-text">or create with email</span>
+                    <span className="rp-divider-text">
+                      or create with email
+                    </span>
                     <div className="rp-divider-line" />
                   </div>
 
                   <form className="rp-form" onSubmit={nextStep}>
-
                     <div className="rp-row">
                       <div className="rp-field">
                         <label className="rp-label">First name</label>
@@ -894,7 +942,7 @@ export default function RegisterPage() {
                           placeholder="Arjun"
                           value={form.firstName}
                           onChange={handle}
-                          onFocus={() => setFocused('firstName')}
+                          onFocus={() => setFocused("firstName")}
                           onBlur={() => setFocused(null)}
                           required
                         />
@@ -908,7 +956,7 @@ export default function RegisterPage() {
                           placeholder="Sharma"
                           value={form.lastName}
                           onChange={handle}
-                          onFocus={() => setFocused('lastName')}
+                          onFocus={() => setFocused("lastName")}
                           onBlur={() => setFocused(null)}
                           required
                         />
@@ -932,7 +980,7 @@ export default function RegisterPage() {
                       <label className="rp-label">Password</label>
                       <div className="rp-input-wrap">
                         <input
-                          type={showPass ? 'text' : 'password'}
+                          type={showPass ? "text" : "password"}
                           name="password"
                           className="rp-input has-icon"
                           placeholder="Min. 8 characters"
@@ -943,19 +991,22 @@ export default function RegisterPage() {
                         <button
                           type="button"
                           className="rp-pass-toggle"
-                          onClick={() => setShowPass(p => !p)}
+                          onClick={() => setShowPass((p) => !p)}
                         >
-                          {showPass ? 'Hide' : 'Show'}
+                          {showPass ? "Hide" : "Show"}
                         </button>
                       </div>
                       {form.password && (
                         <div className="rp-strength">
                           <div className="rp-strength-bars">
-                            {[1,2,3,4].map(n => (
+                            {[1, 2, 3, 4].map((n) => (
                               <div
                                 key={n}
                                 className="rp-strength-bar"
-                                style={{ background: n <= strength ? strengthColor : undefined }}
+                                style={{
+                                  background:
+                                    n <= strength ? strengthColor : undefined,
+                                }}
                               />
                             ))}
                           </div>
@@ -968,24 +1019,36 @@ export default function RegisterPage() {
                         </div>
                       )}
                     </div>
+                    {error && (
+                      <div
+                        style={{
+                          padding: "10px 14px",
+                          background: "rgba(239,68,68,0.1)",
+                          border: "1px solid rgba(239,68,68,0.3)",
+                          borderRadius: 8,
+                          fontFamily: "'Inter', sans-serif",
+                          fontSize: "0.82rem",
+                          color: "#ef4444",
+                        }}
+                      >
+                        ⚠️ {error}
+                      </div>
+                    )}
 
                     <button type="submit" className="rp-submit">
                       Continue <span>→</span>
                     </button>
-
                   </form>
-
                 </div>
               )}
 
               {/* ── STEP 2 ── */}
               {step === 2 && (
                 <div className="rp-step-panel">
-
                   <div className="rp-form-header">
                     <div className="rp-form-eyebrow">Almost there</div>
                     <div className="rp-form-title">
-                      What's your{' '}
+                      What's your{" "}
                       <span className="rp-form-title-accent">career goal?</span>
                     </div>
                     <div className="rp-form-sub">
@@ -994,16 +1057,19 @@ export default function RegisterPage() {
                   </div>
 
                   <form className="rp-form" onSubmit={submit}>
-
                     <div className="rp-field">
                       <label className="rp-label">Select your domain</label>
                       <div className="rp-goal-grid">
-                        {goals.map(g => (
+                        {goals.map((g) => (
                           <button
                             key={g.value}
                             type="button"
-                            className={`rp-goal-btn ${form.goal === g.value ? 'selected' : ''}`}
-                            onClick={() => setForm(p => ({ ...p, goal: g.value }))}
+                            className={`rp-goal-btn ${
+                              form.goal === g.value ? "selected" : ""
+                            }`}
+                            onClick={() =>
+                              setForm((p) => ({ ...p, goal: g.value }))
+                            }
                           >
                             <span className="rp-goal-icon">{g.icon}</span>
                             {g.label}
@@ -1014,27 +1080,50 @@ export default function RegisterPage() {
 
                     <div className="rp-field">
                       <label className="rp-label">
-                        What role are you targeting? <span style={{color:'var(--text-3)'}}>(optional)</span>
+                        What role are you targeting?{" "}
+                        <span style={{ color: "var(--text-3)" }}>
+                          (optional)
+                        </span>
                       </label>
                       <input
                         type="text"
-                        name="goal"
+                        name="targetRole" // ← was "goal" which overwrote the selector
                         className="rp-input"
                         placeholder="e.g. Frontend Developer, Data Analyst..."
-                        value={form.goal}
+                        value={form.targetRole}
                         onChange={handle}
                       />
                     </div>
+                    {error && (
+                      <div
+                        style={{
+                          padding: "10px 14px",
+                          background: "rgba(239,68,68,0.1)",
+                          border: "1px solid rgba(239,68,68,0.3)",
+                          borderRadius: 8,
+                          fontFamily: "'Inter', sans-serif",
+                          fontSize: "0.82rem",
+                          color: "#ef4444",
+                        }}
+                      >
+                        ⚠️ {error}
+                      </div>
+                    )}
 
                     <button
                       type="submit"
                       className="rp-submit"
                       disabled={loading}
                     >
-                      {loading
-                        ? <><div className="rp-spinner" /> Creating account...</>
-                        : <>Create account & get roadmap <span>→</span></>
-                      }
+                      {loading ? (
+                        <>
+                          <div className="rp-spinner" /> Creating account...
+                        </>
+                      ) : (
+                        <>
+                          Create account & get roadmap <span>→</span>
+                        </>
+                      )}
                     </button>
 
                     <button
@@ -1044,30 +1133,26 @@ export default function RegisterPage() {
                     >
                       ← Back
                     </button>
-
                   </form>
-
                 </div>
               )}
 
               <div className="rp-login-link">
-                Already registered?{' '}
+                Already registered?{" "}
                 <Link to="/login">Sign in to your account</Link>
               </div>
 
               <div className="rp-terms">
-                By creating an account you agree to our{' '}
-                <a href="#">Terms of Service</a> and{' '}
+                By creating an account you agree to our{" "}
+                <a href="#">Terms of Service</a> and{" "}
                 <a href="#">Privacy Policy</a>
               </div>
-
             </div>
           </div>
-
         </div>
 
         <Footer />
       </div>
     </>
-  )
+  );
 }
