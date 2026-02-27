@@ -1,14 +1,22 @@
 const nodemailer = require('nodemailer')
-const dotenv     = require('dotenv')
-dotenv.config()
+const dns = require('dns')
+require('dotenv').config()
+
+// 🔥 Force IPv4 (Fixes ENETUNREACH on Render)
+dns.setDefaultResultOrder('ipv4first')
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,              // Use 587 instead of 465
+  secure: false,          // false for 587
+  requireTLS: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 })
+
+module.exports = transporter
 
 const sendRoadmapEmail = async ({ to, userName, role, pdfBuffer }) => {
   await transporter.sendMail({
