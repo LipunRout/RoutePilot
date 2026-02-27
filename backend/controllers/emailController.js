@@ -34,26 +34,30 @@ const sendPDFEmail = async (req, res) => {
       .single()
 
     const userName = profile?.first_name || 'there'
-    const email = process.env.EMAIL_USER
+
+    /* Always get email from auth token — guaranteed to be valid */
+    const email = req.user.email?.trim().toLowerCase()
+
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ success: false, message: 'No valid email found for user' })
+    }
 
     /* Merge roadmap_data with top-level fields so PDF has role/timeline */
     const roadmapData = {
       ...roadmapRow.roadmap_data,
-      role:        roadmapRow.roadmap_data?.role        || roadmapRow.role        || 'Career',
-      timeline:    roadmapRow.roadmap_data?.timeline    || roadmapRow.form_data?.timeline ? `${roadmapRow.form_data.timeline} months` : '6 months',
-      totalPhases: roadmapRow.roadmap_data?.totalPhases || roadmapRow.roadmap_data?.phases?.length || 5,
-      overview:    roadmapRow.roadmap_data?.overview    || '',
-      phases:      roadmapRow.roadmap_data?.phases      || [],
+      role:        roadmapRow.roadmap_data?.role     || roadmapRow.role     || 'Career',
+      timeline:    roadmapRow.roadmap_data?.timeline || (roadmapRow.form_data?.timeline ? `${roadmapRow.form_data.timeline} months` : '6 months'),
+      totalPhases: roadmapRow.roadmap_data?.phases?.length || 5,
+      overview:    roadmapRow.roadmap_data?.overview || '',
+      phases:      roadmapRow.roadmap_data?.phases   || [],
     }
 
     console.log('[email debug] role:', roadmapData.role)
-    console.log('[email debug] timeline:', roadmapData.timeline)
-    console.log('[email debug] phases:', roadmapData.phases?.length)
     console.log('[email debug] email:', email)
+    console.log('[email debug] phases:', roadmapData.phases?.length)
 
     /* Generate PDF buffer */
     const pdfBuffer = await generateRoadmapPDF(roadmapData, userName)
-
     console.log('[email debug] pdfBuffer:', pdfBuffer ? `${pdfBuffer.length} bytes` : 'UNDEFINED')
 
     /* Send email */
