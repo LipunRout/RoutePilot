@@ -5,31 +5,136 @@ import Footer from "../components/Footer";
 import { useAuth } from "../context/AuthContext";
 import { getUserRoadmaps } from "../services/api";
 
-const ACHIEVEMENTS = [
-  { icon: "🔥", label: "7-day streak", earned: false },
-  { icon: "⚡", label: "First roadmap", earned: false },
-  { icon: "✦", label: "Phase master", earned: false },
-  { icon: "📚", label: "50 hours logged", earned: false },
-  { icon: "🚀", label: "Roadmap complete", earned: false },
-  { icon: "🎯", label: "30-day streak", earned: false },
-  { icon: "💎", label: "100 hours", earned: false },
-  { icon: "🏆", label: "All phases done", earned: false },
-];
-const ACTIVITY = [
-  { day: "Mon", hrs: 2.5 },
-  { day: "Tue", hrs: 1.0 },
-  { day: "Wed", hrs: 3.0 },
-  { day: "Thu", hrs: 0.5 },
-  { day: "Fri", hrs: 2.0 },
-  { day: "Sat", hrs: 4.0 },
-  { day: "Sun", hrs: 1.5 },
-];
+/* ── Greeting ── */
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  if (hour < 21) return "Good evening";
+  return "Good night";
+};
+const [achievements, setAchievements] = useState([]);
+const [activity, setActivity] = useState([
+  { day: "Mon", hrs: 0 },
+  { day: "Tue", hrs: 0 },
+  { day: "Wed", hrs: 0 },
+  { day: "Thu", hrs: 0 },
+  { day: "Fri", hrs: 0 },
+  { day: "Sat", hrs: 0 },
+  { day: "Sun", hrs: 0 },
+]);
 
-const maxHrs = Math.max(...ACTIVITY.map((a) => a.hrs));
+/* ── Build achievements from real roadmap data ── */
+const buildAchievements = (roadmaps) => {
+  const totalRoadmaps = roadmaps.length;
+  const completedRoadmaps = roadmaps.filter(
+    (r) => r.status === "completed"
+  ).length;
+  const totalPhasesDone = roadmaps.reduce(
+    (a, r) => a + (r.completed_phases || 0),
+    0
+  );
+  const xp = totalRoadmaps * 100;
 
-const todayIndex = new Date().getDay();
-const adjustedIndex = todayIndex === 0 ? 6 : todayIndex - 1;
+  // Days since first roadmap (simulate streak logic)
+  const dates = roadmaps
+    .map((r) => new Date(r.created_at))
+    .sort((a, b) => b - a);
 
+  const daysSinceFirst =
+    dates.length > 0
+      ? Math.floor(
+          (new Date() - dates[dates.length - 1]) / (1000 * 60 * 60 * 24)
+        )
+      : 0;
+
+  return [
+    {
+      icon: "⚡",
+      label: "First roadmap",
+      earned: totalRoadmaps >= 1,
+      desc:
+        totalRoadmaps >= 1
+          ? "Created your first roadmap!"
+          : "Create your first roadmap",
+    },
+    {
+      icon: "🔥",
+      label: "7-day streak",
+      earned: daysSinceFirst >= 7,
+      desc:
+        daysSinceFirst >= 7
+          ? "Used RoutePilot for 7+ days!"
+          : `${daysSinceFirst}/7 days`,
+    },
+    {
+      icon: "✦",
+      label: "Phase master",
+      earned: totalPhasesDone >= 5,
+      desc:
+        totalPhasesDone >= 5
+          ? "Completed 5+ phases!"
+          : `${totalPhasesDone}/5 phases done`,
+    },
+    {
+      icon: "🚀",
+      label: "Roadmap complete",
+      earned: completedRoadmaps >= 1,
+      desc:
+        completedRoadmaps >= 1
+          ? "Finished a full roadmap!"
+          : "Complete a full roadmap",
+    },
+    {
+      icon: "📚",
+      label: "3 roadmaps",
+      earned: totalRoadmaps >= 3,
+      desc:
+        totalRoadmaps >= 3
+          ? "Created 3 roadmaps!"
+          : `${totalRoadmaps}/3 roadmaps`,
+    },
+    {
+      icon: "🎯",
+      label: "30-day learner",
+      earned: daysSinceFirst >= 30,
+      desc:
+        daysSinceFirst >= 30
+          ? "Learning for 30+ days!"
+          : `${daysSinceFirst}/30 days`,
+    },
+    {
+      icon: "💎",
+      label: "500 XP",
+      earned: xp >= 500,
+      desc: xp >= 500 ? "Earned 500+ XP!" : `${xp}/500 XP`,
+    },
+    {
+      icon: "🏆",
+      label: "All phases done",
+      earned: completedRoadmaps >= 1 && totalPhasesDone >= 10,
+      desc:
+        completedRoadmaps >= 1
+          ? "Mastered all phases!"
+          : "Complete all phases in a roadmap",
+    },
+  ];
+};
+
+/* ── Build activity chart from real roadmap dates ── */
+const buildActivity = (roadmaps) => {
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const counts = [0, 0, 0, 0, 0, 0, 0];
+
+  roadmaps.forEach((r) => {
+    const d = new Date(r.last_active_at || r.created_at);
+    // getDay() returns 0=Sun...6=Sat, convert to Mon=0
+    const idx = d.getDay() === 0 ? 6 : d.getDay() - 1;
+    counts[idx] += 1;
+  });
+
+  return days.map((day, i) => ({ day, hrs: counts[i] }));
+};
 const CAT_COLORS = {
   it: {
     color: "#00c97a",
@@ -171,6 +276,8 @@ export default function Dashboard() {
           };
         });
         setRoadmaps(mapped);
+        setAchievements(buildAchievements(data.roadmaps)); // ← add
+        setActivity(buildActivity(data.roadmaps)); // ← add
       })
       .catch(console.error)
       .finally(() => setLoadingRoads(false));
@@ -518,7 +625,7 @@ export default function Dashboard() {
               <div className="db-avatar-row">
                 <div className="db-avatar">{USER.avatar}</div>
                 <div className="db-welcome-text">
-                  <div className="db-greeting">Good morning 👋</div>
+                  <div className="db-greeting">{getGreeting()} 👋</div>
                   <div className="db-name-line">
                     <span className="db-name-inter">Welcome back,</span>
                     <span className="db-name-cormorant">
