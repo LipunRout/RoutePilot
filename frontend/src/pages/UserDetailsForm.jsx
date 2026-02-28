@@ -356,10 +356,7 @@ export default function UserDetailsForm() {
                       border: "1px solid var(--border)",
                     }}
                   >
-                    👤 Creating roadmap for{" "}
-                    <strong style={{ color: "var(--primary)" }}>
-                      {userName}
-                    </strong>
+                    👤 {userName}
                   </div>
                   <div className="ud-row">
                     <div className="ud-field">
@@ -369,7 +366,7 @@ export default function UserDetailsForm() {
                       <input
                         type="number"
                         className="ud-input"
-                        placeholder="22"
+                        placeholder="e.g. 25"
                         min="13"
                         max="65"
                         value={form.age}
@@ -475,7 +472,7 @@ export default function UserDetailsForm() {
                 {/* Summary preview */}
                 <div className="ud-preview">
                   {[
-                    { icon:'👤', label:'Name', val: userName },
+                    { icon: "👤", label: "Name", val: userName },
                     {
                       icon: "⚡",
                       label: "Level",
