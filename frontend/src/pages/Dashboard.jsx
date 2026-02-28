@@ -14,7 +14,6 @@ const getGreeting = () => {
   return "Good night";
 };
 
-
 /* ── Build achievements from real roadmap data ── */
 const buildAchievements = (roadmaps) => {
   const totalRoadmaps = roadmaps.length;
@@ -230,15 +229,15 @@ const EmptyRoadmaps = () => (
 
 export default function Dashboard() {
   const [achievements, setAchievements] = useState([]);
-const [activity, setActivity] = useState([
-  { day: "Mon", hrs: 0 },
-  { day: "Tue", hrs: 0 },
-  { day: "Wed", hrs: 0 },
-  { day: "Thu", hrs: 0 },
-  { day: "Fri", hrs: 0 },
-  { day: "Sat", hrs: 0 },
-  { day: "Sun", hrs: 0 },
-]);
+  const [activity, setActivity] = useState([
+    { day: "Mon", hrs: 0 },
+    { day: "Tue", hrs: 0 },
+    { day: "Wed", hrs: 0 },
+    { day: "Thu", hrs: 0 },
+    { day: "Fri", hrs: 0 },
+    { day: "Sat", hrs: 0 },
+    { day: "Sun", hrs: 0 },
+  ]);
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setTab] = useState("overview");
@@ -342,7 +341,9 @@ const [activity, setActivity] = useState([
   const cHours = useCounter(USER.totalHours, 1800, statsOn);
   const cXP = useCounter(USER.xp, 2000, statsOn);
   const cRoads = useCounter(roadmaps.length, 800, statsOn);
-  const maxHrs = Math.max(...ACTIVITY.map((a) => a.hrs));
+  const maxHrs = Math.max(...activity.map((a) => a.hrs), 1);
+  const today = new Date().getDay();
+  const adjustedIndex = today === 0 ? 6 : today - 1;
 
   return (
     <>
@@ -777,7 +778,7 @@ const [activity, setActivity] = useState([
                 <div className="db-card" style={{ animationDelay: "0.1s" }}>
                   <div className="db-card-title">This week's activity</div>
                   <div className="db-chart">
-                    {ACTIVITY.map((a, i) => {
+                    {activity.map((a, i) => {
                       const isToday = i === adjustedIndex;
 
                       return (
@@ -811,7 +812,7 @@ const [activity, setActivity] = useState([
                 <div className="db-card" style={{ animationDelay: "0.15s" }}>
                   <div className="db-card-title">Achievements</div>
                   <div className="db-achievements">
-                    {ACHIEVEMENTS.map((a, i) => (
+                    {achievements.map((a, i) => (
                       <div
                         key={i}
                         className={`db-ach ${!a.earned ? "locked" : ""}`}
