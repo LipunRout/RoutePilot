@@ -20,22 +20,24 @@ const ScrollToTop = () => {
       <style>{`
         .scroll-top-btn {
           position: fixed;
-          bottom: 30px;
-          right: 30px;
-          width: 52px;
-          height: 52px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #00ff88, #00d4ff);
-          border: none;
+          bottom: 90px;        /* sits above chatbot (chatbot is ~70px from bottom) */
+          right: 24px;
+          width: 38px;
+          height: 38px;
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.12);
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
           z-index: 9999;
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
           opacity: 0;
-          transform: translateY(30px) scale(0.8);
+          transform: translateY(10px) scale(0.9);
           pointer-events: none;
         }
 
@@ -46,9 +48,10 @@ const ScrollToTop = () => {
         }
 
         .scroll-top-btn:hover {
-          transform: translateY(-5px) scale(1.1);
-          box-shadow: 0 0 40px rgba(0, 255, 136, 0.7),
-                      0 0 80px rgba(0, 212, 255, 0.3);
+          background: rgba(0, 201, 122, 0.12);
+          border-color: rgba(0, 201, 122, 0.35);
+          box-shadow: 0 4px 20px rgba(0, 201, 122, 0.2);
+          transform: translateY(-2px) scale(1.05);
         }
 
         .scroll-top-btn:active {
@@ -56,20 +59,25 @@ const ScrollToTop = () => {
         }
 
         .arrow-icon {
-          width: 22px;
-          height: 22px;
-          border-left: 3px solid #000;
-          border-top: 3px solid #000;
-          transform: rotate(45deg) translate(3px, 3px);
-          border-radius: 2px;
+          width: 10px;
+          height: 10px;
+          border-left: 2px solid rgba(255,255,255,0.7);
+          border-top: 2px solid rgba(255,255,255,0.7);
+          transform: rotate(45deg) translate(2px, 2px);
+          border-radius: 1px;
+          transition: border-color 0.2s ease;
+        }
+
+        .scroll-top-btn:hover .arrow-icon {
+          border-color: #00c97a;
         }
 
         @media (max-width: 768px) {
           .scroll-top-btn {
-            bottom: 20px;
-            right: 20px;
-            width: 46px;
-            height: 46px;
+            bottom: 85px;
+            right: 16px;
+            width: 34px;
+            height: 34px;
           }
         }
       `}</style>

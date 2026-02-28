@@ -5,12 +5,151 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RoutePilot</title>
+    <style>
+      @keyframes chatPulse {
+        0%   { box-shadow: 0 0 0 0 rgba(0,201,122,0.4), 0 0 20px rgba(0,201,122,0.1) !important; }
+        50%  { box-shadow: 0 0 0 10px rgba(0,201,122,0), 0 0 35px rgba(0,201,122,0.2) !important; }
+        100% { box-shadow: 0 0 0 0 rgba(0,201,122,0), 0 0 20px rgba(0,201,122,0.1) !important; }
+      }
+
+      @keyframes chatShimmer {
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(250%); }
+      }
+
+      @keyframes windowIn {
+        from { opacity: 0; transform: translateY(16px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- Chatbase Chatbot -->
     <script>
       (function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="ebgZ1Exg24rOFNZjp20Jx";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
+    </script>
+
+    <!-- Apply styles AFTER chatbase loads -->
+    <script>
+      function applyChatbaseStyles() {
+        const btn = document.getElementById('chatbase-bubble-button')
+        const win = document.getElementById('chatbase-bubble-window')
+
+        if (!btn) {
+          setTimeout(applyChatbaseStyles, 500)
+          return
+        }
+
+        // ── Button styles ──
+        Object.assign(btn.style, {
+          bottom:           '24px',
+          right:            '24px',
+          width:            '52px',
+          height:           '52px',
+          borderRadius:     '14px',
+          background:       'rgba(5, 15, 10, 0.75)',
+          backdropFilter:   'blur(20px)',
+          webkitBackdropFilter: 'blur(20px)',
+          border:           '1px solid rgba(0, 201, 122, 0.5)',
+          boxShadow:        '0 0 0 0 rgba(0,201,122,0.4), 0 0 20px rgba(0,201,122,0.1), inset 0 1px 0 rgba(0,201,122,0.15)',
+          animation:        'chatPulse 3s ease-in-out infinite',
+          transition:       'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+          position:         'fixed',
+          zIndex:           '999999',
+          overflow:         'hidden',
+          cursor:           'pointer',
+        })
+
+        // shimmer overlay
+        const shimmer = document.createElement('div')
+        Object.assign(shimmer.style, {
+          position:   'absolute',
+          top:        '0',
+          left:       '0',
+          width:      '30%',
+          height:     '100%',
+          background: 'linear-gradient(105deg, transparent 20%, rgba(0,201,122,0.18) 50%, transparent 80%)',
+          animation:  'chatShimmer 3.5s ease-in-out infinite',
+          pointerEvents: 'none',
+          borderRadius: '14px',
+        })
+        btn.appendChild(shimmer)
+
+        // top green line
+        const topLine = document.createElement('div')
+        Object.assign(topLine.style, {
+          position:   'absolute',
+          top:        '0',
+          left:       '15%',
+          right:      '15%',
+          height:     '1px',
+          background: 'linear-gradient(90deg, transparent, #00c97a, transparent)',
+          pointerEvents: 'none',
+        })
+        btn.appendChild(topLine)
+
+        // hover effects
+        btn.addEventListener('mouseenter', () => {
+          btn.style.transform   = 'translateY(-3px) scale(1.06)'
+          btn.style.borderColor = 'rgba(0, 201, 122, 0.9)'
+          btn.style.boxShadow   = '0 0 0 4px rgba(0,201,122,0.08), 0 0 30px rgba(0,201,122,0.3), 0 8px 32px rgba(0,0,0,0.4)'
+        })
+        btn.addEventListener('mouseleave', () => {
+          btn.style.transform   = 'translateY(0) scale(1)'
+          btn.style.borderColor = 'rgba(0, 201, 122, 0.5)'
+          btn.style.boxShadow   = '0 0 0 0 rgba(0,201,122,0.4), 0 0 20px rgba(0,201,122,0.1)'
+        })
+
+        // ── Window styles ──
+        if (win) {
+          Object.assign(win.style, {
+            bottom:           '90px',
+            right:            '24px',
+            borderRadius:     '20px',
+            border:           '1px solid rgba(0, 201, 122, 0.2)',
+            background:       'rgba(5, 12, 8, 0.9)',
+            backdropFilter:   'blur(24px)',
+            webkitBackdropFilter: 'blur(24px)',
+            boxShadow:        '0 0 0 1px rgba(0,201,122,0.06), 0 32px 80px rgba(0,0,0,0.6), 0 0 60px rgba(0,201,122,0.04)',
+            animation:        'windowIn 0.3s cubic-bezier(0.4,0,0.2,1)',
+            overflow:         'hidden',
+          })
+
+          // green top line on window
+          const winLine = document.createElement('div')
+          Object.assign(winLine.style, {
+            position:   'absolute',
+            top:        '0',
+            left:       '15%',
+            right:      '15%',
+            height:     '1px',
+            background: 'linear-gradient(90deg, transparent, #00c97a, transparent)',
+            zIndex:     '10',
+            pointerEvents: 'none',
+          })
+          win.appendChild(winLine)
+        }
+
+        // re-apply window styles when it opens
+        const observer = new MutationObserver(() => {
+          const w = document.getElementById('chatbase-bubble-window')
+          if (w && w.style.display !== 'none') {
+            w.style.borderRadius   = '20px'
+            w.style.border         = '1px solid rgba(0, 201, 122, 0.2)'
+            w.style.backdropFilter = 'blur(24px)'
+            w.style.boxShadow      = '0 0 0 1px rgba(0,201,122,0.06), 0 32px 80px rgba(0,0,0,0.6)'
+          }
+        })
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true })
+      }
+
+      // Wait for chatbase to load
+      window.addEventListener('load', () => {
+        setTimeout(applyChatbaseStyles, 1000)
+      })
     </script>
   </body>
 </html>
