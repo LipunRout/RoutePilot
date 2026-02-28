@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { getRoadmap, updateProgress, emailRoadmapPDF } from "../services/api";
+import Certificate from '../components/Certificate'
+import { useAuth } from '../context/AuthContext'
 
 const DIFF_COLOR = {
   Beginner: "#00c97a",
@@ -14,10 +16,13 @@ const DIFF_COLOR = {
 
 const PHASE_COLORS = ["#00c97a", "#0ea5e9", "#a855f7", "#f59e0b", "#ef4444", "#06b6d4", "#84cc16"];
 
-export default function RoadmapPage() {
+export default function RoadmapPage() 
+{
   const { id }       = useParams()
   const navigate     = useNavigate()
   const progressRef  = useRef(null)
+  const { user } = useAuth()           // ← add this
+  const [showCert, setShowCert] = useState(false)  // ← add this
 
   const [roadmap,   setRoadmap]   = useState(null)
   const [loading,   setLoading]   = useState(true)
@@ -27,6 +32,11 @@ export default function RoadmapPage() {
   const [emailSent, setEmail]     = useState(false)
   const [copyDone,  setCopy]      = useState(false)
   const [activeTab, setTab]       = useState("roadmap")
+
+  const userName = user?.user_metadata?.first_name
+  || user?.user_metadata?.full_name
+  || user?.email?.split('@')[0]
+  || 'Learner'
 
   /* ── Fetch real roadmap from backend ── */
   useEffect(() => {
@@ -183,8 +193,55 @@ export default function RoadmapPage() {
         .rm-phase-subtitle { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; font-style: italic; color: var(--text-3); line-height: 1; }
         .rm-phase-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .rm-phase-duration { font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 500; color: var(--text-3); padding: 3px 9px; border: 1px solid var(--border); border-radius: 20px; background: var(--bg-2); white-space: nowrap; }
-        .rm-phase-check { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-2); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; transition: all 0.2s ease; flex-shrink: 0; }
-        .rm-phase-check.done { background: var(--primary); border-color: var(--primary); color: #000; font-weight: 700; }
+        .rm-phase-check {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px dashed var(--border);
+  background: var(--bg-2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  flex-shrink: 0;
+  position: relative;
+  color: var(--text-3);
+}
+
+.rm-phase-check::before {
+  content: '✓';
+  opacity: 0.3;
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.rm-phase-check:hover {
+  border-style: solid;
+  border-color: var(--primary);
+  background: rgba(0,201,122,0.08);
+  color: var(--primary);
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(0,201,122,0.2);
+}
+
+.rm-phase-check:hover::before {
+  opacity: 1;
+  color: var(--primary);
+}
+
+.rm-phase-check.done {
+  background: var(--primary);
+  border: 2px solid var(--primary);
+  border-style: solid;
+  color: #000;
+  box-shadow: 0 0 16px rgba(0,201,122,0.4);
+  transform: scale(1.05);
+}
+
+.rm-phase-check.done::before {
+  content: '✓';
+  opacity: 1;
+  color: #000;
+  font-weight: 800;
+}
         .rm-phase-chevron { font-size: 0.78rem; color: var(--text-3); transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); flex-shrink: 0; }
         .rm-phase.open .rm-phase-chevron { transform: rotate(90deg); }
 
@@ -298,12 +355,42 @@ export default function RoadmapPage() {
             </div>
 
             <div className="rm-progress-strip" ref={progressRef}>
-              <span className="rm-progress-label">{completedCount}/{totalPhases} phases complete</span>
-              <div className="rm-progress-bar-wrap">
-                <div className="rm-progress-bar-fill" style={{ width: `${pct}%` }} />
-              </div>
-              <span className="rm-progress-pct">{pct}%</span>
-            </div>
+  <span className="rm-progress-label">{completedCount}/{totalPhases} phases complete</span>
+  <div className="rm-progress-bar-wrap">
+    <div className="rm-progress-bar-fill" style={{ width: `${pct}%` }} />
+  </div>
+  <span className="rm-progress-pct">{pct}%</span>
+</div>
+
+{/* Certificate button — shows when all phases done */}
+{completedCount > 0 && completedCount === totalPhases && (
+  <div style={{ display:'flex', justifyContent:'center', padding:'16px 0' }}>
+    <button
+      onClick={() => setShowCert(true)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 8,
+        padding: '12px 28px', borderRadius: 10, border: 'none',
+        background: 'linear-gradient(135deg, #00c97a, #0ea5e9)',
+        color: '#000', fontFamily:"'Inter',sans-serif",
+        fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer',
+        boxShadow: '0 0 24px rgba(0,201,122,0.3)',
+      }}
+    >
+      🏆 Claim Your Certificate
+    </button>
+  </div>
+)}
+
+{/* Certificate modal */}
+{showCert && (
+  <Certificate
+    userName={userName}
+    role={rd.role}
+    completedPhases={completedCount}
+    totalPhases={totalPhases}
+    onClose={() => setShowCert(false)}
+  />
+)}
 
             <div className="rm-tabs">
               {[{ id: "roadmap", label: "◈ Roadmap" }, { id: "overview", label: "◎ Overview" }].map(t => (
@@ -341,13 +428,17 @@ export default function RoadmapPage() {
                       </div>
                       <div className="rm-phase-meta">
                         <span className="rm-phase-duration">⏱ {phase.duration}</span>
-                        <div
-                          className={`rm-phase-check ${isDone ? "done" : ""}`}
-                          onClick={e => { e.stopPropagation(); toggleComplete(phase.id) }}
-                          title="Mark complete"
-                        >
-                          {isDone ? "✓" : ""}
-                        </div>
+                        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+  <span style={{ fontFamily:"'Inter',sans-serif", fontSize:"0.7rem", color: isDone ? "var(--primary)" : "var(--text-3)", whiteSpace:'nowrap' }}>
+    {isDone ? "Completed" : "Mark done"}
+  </span>
+  <div
+    className={`rm-phase-check ${isDone ? "done" : ""}`}
+    onClick={e => { e.stopPropagation(); toggleComplete(phase.id) }}
+    title={isDone ? "Mark incomplete" : "Mark as complete"}
+  />
+</div>
+
                       </div>
                       <div className="rm-phase-chevron">›</div>
                     </div>

@@ -568,7 +568,7 @@ export default function UserDetailsForm() {
                           marginTop: 4,
                         }}
                       >
-                        {["1m", "3m", "6m", "9m", "12m", "18m"].map((m) => (
+                        {/* {["1m", "3m", "6m", "9m", "12m", "18m"].map((m) => (
                           <span
                             key={m}
                             className="ud-slider-mark"
@@ -579,7 +579,7 @@ export default function UserDetailsForm() {
                           >
                             {m}
                           </span>
-                        ))}
+                        ))} */}
                       </div>
                     </div>
                   </div>
