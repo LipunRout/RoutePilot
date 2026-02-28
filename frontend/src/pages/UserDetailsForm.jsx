@@ -534,11 +534,11 @@ export default function UserDetailsForm() {
                           {form.timeline} months
                         </div>
                         <div className="ud-slider-hint">
-                          {form.timeline <= 3
+                          {Number(form.timeline) <= 3
                             ? "Intensive 🔥"
-                            : form.timeline <= 6
+                            : Number(form.timeline) <= 6
                             ? "Balanced ⚡"
-                            : form.timeline <= 9
+                            : Number(form.timeline) <= 9
                             ? "Comfortable ☀️"
                             : "Relaxed 🌙"}
                         </div>
@@ -553,15 +553,30 @@ export default function UserDetailsForm() {
                         onChange={(e) => set("timeline", e.target.value)}
                         style={{
                           background: `linear-gradient(90deg, var(--primary) ${
-                            ((form.timeline - 1) / 17) * 100
+                            ((Number(form.timeline) - 1) / 17) * 100
                           }%, var(--bg-3) ${
-                            ((form.timeline - 1) / 17) * 100
+                            ((Number(form.timeline) - 1) / 17) * 100
                           }%)`,
                         }}
                       />
-                      <div className="ud-slider-marks">
+                      <div
+                        className="ud-slider-marks"
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          padding: "4px 2px 0",
+                          marginTop: 4,
+                        }}
+                      >
                         {["1m", "3m", "6m", "9m", "12m", "18m"].map((m) => (
-                          <span key={m} className="ud-slider-mark">
+                          <span
+                            key={m}
+                            className="ud-slider-mark"
+                            style={{
+                              fontSize: "0.62rem",
+                              color: "var(--text-3)",
+                            }}
+                          >
                             {m}
                           </span>
                         ))}
