@@ -1,82 +1,112 @@
-import { useState } from 'react'
-import { useNavigate, useSearchParams, Link } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
-import { generateRoadmap } from '../services/api'
+import { useState } from "react";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { generateRoadmap } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 const LEVELS = [
-  { value: 'beginner',     label: 'Complete Beginner', icon: '🌱', desc: 'No prior knowledge' },
-  { value: 'basic',        label: 'Some Basics',       icon: '📖', desc: 'Know fundamentals'  },
-  { value: 'intermediate', label: 'Intermediate',      icon: '⚡', desc: 'Built small projects'},
-  { value: 'advanced',     label: 'Advanced',          icon: '🚀', desc: 'Work experience'    },
-]
+  {
+    value: "beginner",
+    label: "Complete Beginner",
+    icon: "🌱",
+    desc: "No prior knowledge",
+  },
+  {
+    value: "basic",
+    label: "Some Basics",
+    icon: "📖",
+    desc: "Know fundamentals",
+  },
+  {
+    value: "intermediate",
+    label: "Intermediate",
+    icon: "⚡",
+    desc: "Built small projects",
+  },
+  { value: "advanced", label: "Advanced", icon: "🚀", desc: "Work experience" },
+];
 
 const HOURS = [
-  { value: '1-2', label: '1–2 hrs/day', icon: '🌙', desc: 'Part-time'  },
-  { value: '3-4', label: '3–4 hrs/day', icon: '☀️', desc: 'Moderate'   },
-  { value: '5-6', label: '5–6 hrs/day', icon: '🔥', desc: 'Dedicated'  },
-  { value: '8+',  label: '8+ hrs/day',  icon: '💪', desc: 'Full-time'  },
-]
+  { value: "1-2", label: "1–2 hrs/day", icon: "🌙", desc: "Part-time" },
+  { value: "3-4", label: "3–4 hrs/day", icon: "☀️", desc: "Moderate" },
+  { value: "5-6", label: "5–6 hrs/day", icon: "🔥", desc: "Dedicated" },
+  { value: "8+", label: "8+ hrs/day", icon: "💪", desc: "Full-time" },
+];
 
 const GOALS = [
-  { value: 'job',       label: 'Get a Job',       icon: '💼' },
-  { value: 'freelance', label: 'Freelancing',      icon: '🌐' },
-  { value: 'switch',    label: 'Career Switch',    icon: '🔄' },
-  { value: 'upskill',   label: 'Upskill / Grow',  icon: '📈' },
-  { value: 'startup',   label: 'Build a Startup',  icon: '🚀' },
-  { value: 'exam',      label: 'Crack an Exam',    icon: '📋' },
-]
+  { value: "job", label: "Get a Job", icon: "💼" },
+  { value: "freelance", label: "Freelancing", icon: "🌐" },
+  { value: "switch", label: "Career Switch", icon: "🔄" },
+  { value: "upskill", label: "Upskill / Grow", icon: "📈" },
+  { value: "startup", label: "Build a Startup", icon: "🚀" },
+  { value: "exam", label: "Crack an Exam", icon: "📋" },
+];
 
 export default function UserDetailsForm() {
-  const [searchParams] = useSearchParams()
-  const navigate       = useNavigate()
-  const catId          = searchParams.get('category') || 'it'
-  const roleId         = searchParams.get('role')     || 'frontend'
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { user } = useAuth(); // ← get logged in user
 
-  const [step, setStep]     = useState(1)
-  const [loading, setLoading] = useState(false)
-  const [error, setError]   = useState('')
+  const catId = searchParams.get("category") || "it";
+  const roleId = searchParams.get("role") || "frontend";
+
+  // Get name from auth — no need to ask again
+  const userName =
+    user?.user_metadata?.first_name ||
+    user?.user_metadata?.full_name?.split(" ")[0] ||
+    user?.email?.split("@")[0] ||
+    "there";
+
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
-    name: '', age: '', city: '',
-    level: '', hours: '', goal: '',
-    timeline: '6', background: '', extra: '',
-  })
+    age: "",
+    city: "",
+    level: "",
+    hours: "",
+    goal: "",
+    timeline: "6",
+    background: "",
+    extra: "",
+  });
 
-  const set = (key, val) => setForm(p => ({ ...p, [key]: val }))
+  const set = (key, val) => setForm((p) => ({ ...p, [key]: val }));
 
   const nextStep = (e) => {
-    e.preventDefault()
-    setStep(2)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+    e.preventDefault();
+    setStep(2);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const submit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
     try {
       const { data } = await generateRoadmap({
-        role:       roleId.replace(/-/g, ' '),
-        category:   catId,
-        level:      form.level,
-        hours:      form.hours,
-        goal:       form.goal,
-        timeline:   form.timeline,
+        role: roleId.replace(/-/g, " "),
+        category: catId,
+        level: form.level,
+        hours: form.hours,
+        goal: form.goal,
+        timeline: form.timeline,
         background: form.background,
-        extra:      form.extra,
-      })
-
-      /* Navigate to roadmap page with the new ID */
-      navigate(`/roadmap/${data.roadmapId}`)
-
+        extra: form.extra,
+      });
+      navigate(`/roadmap/${data.roadmapId}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to generate roadmap. Please try again.')
-      setLoading(false)
+      setError(
+        err.response?.data?.message ||
+          "Failed to generate roadmap. Please try again."
+      );
+      setLoading(false);
     }
-  }
+  };
 
-  const progress = (step / 2) * 100
+  const progress = (step / 2) * 100;
 
   return (
     <>
@@ -241,14 +271,19 @@ export default function UserDetailsForm() {
           <div className="ud-radial" />
 
           <div className="ud-inner">
-
             {/* Breadcrumb */}
             <nav className="ud-breadcrumb">
-              <Link to="/"                              className="ud-bc-link">Home</Link>
+              <Link to="/" className="ud-bc-link">
+                Home
+              </Link>
               <span className="ud-bc-sep">›</span>
-              <Link to="/category"                      className="ud-bc-link">Domain</Link>
+              <Link to="/category" className="ud-bc-link">
+                Domain
+              </Link>
               <span className="ud-bc-sep">›</span>
-              <Link to={`/roles?category=${catId}`}     className="ud-bc-link">Role</Link>
+              <Link to={`/roles?category=${catId}`} className="ud-bc-link">
+                Role
+              </Link>
               <span className="ud-bc-sep">›</span>
               <span className="ud-bc-active">Your Details</span>
             </nav>
@@ -257,11 +292,18 @@ export default function UserDetailsForm() {
             <div className="ud-progress">
               <div className="ud-progress-top">
                 <div className="ud-progress-steps">
-                  {[1,2].map((n, i) => (
-                    <span key={n} style={{ display:'flex', alignItems:'center', gap:6 }}>
+                  {[1, 2].map((n, i) => (
+                    <span
+                      key={n}
+                      style={{ display: "flex", alignItems: "center", gap: 6 }}
+                    >
                       {i > 0 && <div className="ud-progress-line" />}
-                      <div className={`ud-progress-dot ${n < step ? 'done' : n === step ? 'current' : ''}`}>
-                        {n < step ? '✓' : n}
+                      <div
+                        className={`ud-progress-dot ${
+                          n < step ? "done" : n === step ? "current" : ""
+                        }`}
+                      >
+                        {n < step ? "✓" : n}
                       </div>
                     </span>
                   ))}
@@ -269,7 +311,10 @@ export default function UserDetailsForm() {
                 <span className="ud-progress-label">Step {step} of 2</span>
               </div>
               <div className="ud-progress-bar">
-                <div className="ud-progress-fill" style={{ width:`${progress}%` }} />
+                <div
+                  className="ud-progress-fill"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
             </div>
 
@@ -280,53 +325,92 @@ export default function UserDetailsForm() {
               <span className="ud-title-line2">yourself</span>
               <p className="ud-subtitle">
                 The more you share, the more personalized your roadmap will be.
-                Fields marked <span style={{ color:'var(--primary)' }}>*</span> are required.
+                Fields marked <span style={{ color: "var(--primary)" }}>*</span>{" "}
+                are required.
               </p>
             </div>
 
             {/* Role chip */}
             <div className="ud-role-chip">
-              ✦ Building roadmap for:{' '}
-              <strong style={{ textTransform:'capitalize' }}>
-                {roleId.replace(/-/g,' ')}
+              ✦ Building roadmap for:{" "}
+              <strong style={{ textTransform: "capitalize" }}>
+                {roleId.replace(/-/g, " ")}
               </strong>
             </div>
 
             {/* ── STEP 1 ── */}
             {step === 1 && (
               <form onSubmit={nextStep}>
-
                 <div className="ud-card">
                   <div className="ud-section-title">Basic Information</div>
+                  {/* Show user's name instead of asking for it */}
+                  <div
+                    style={{
+                      fontFamily: "'Inter',sans-serif",
+                      fontSize: "0.85rem",
+                      color: "var(--text-2)",
+                      marginBottom: 16,
+                      padding: "10px 14px",
+                      background: "var(--bg-2)",
+                      borderRadius: 9,
+                      border: "1px solid var(--border)",
+                    }}
+                  >
+                    👤 Creating roadmap for{" "}
+                    <strong style={{ color: "var(--primary)" }}>
+                      {userName}
+                    </strong>
+                  </div>
                   <div className="ud-row">
                     <div className="ud-field">
-                      <label className="ud-label">Full name <span className="ud-required">*</span></label>
-                      <input type="text" className="ud-input" placeholder="Arjun Sharma"
-                        value={form.name} onChange={e => set('name', e.target.value)} required />
+                      <label className="ud-label">
+                        Age <span className="ud-required">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        className="ud-input"
+                        placeholder="22"
+                        min="13"
+                        max="65"
+                        value={form.age}
+                        onChange={(e) => set("age", e.target.value)}
+                        required
+                      />
                     </div>
                     <div className="ud-field">
-                      <label className="ud-label">Age <span className="ud-required">*</span></label>
-                      <input type="number" className="ud-input" placeholder="22"
-                        min="13" max="65"
-                        value={form.age} onChange={e => set('age', e.target.value)} required />
+                      <label className="ud-label">
+                        City <span className="ud-optional">(optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="ud-input"
+                        placeholder="Mumbai, India"
+                        value={form.city}
+                        onChange={(e) => set("city", e.target.value)}
+                      />
                     </div>
-                  </div>
-                  <div className="ud-field">
-                    <label className="ud-label">City <span className="ud-optional">(optional)</span></label>
-                    <input type="text" className="ud-input" placeholder="Mumbai, India"
-                      value={form.city} onChange={e => set('city', e.target.value)} />
                   </div>
                 </div>
 
                 <div className="ud-card">
-                  <div className="ud-section-title">Current Experience Level</div>
+                  <div className="ud-section-title">
+                    Current Experience Level
+                  </div>
                   <div className="ud-field">
-                    <label className="ud-label">Where are you right now? <span className="ud-required">*</span></label>
+                    <label className="ud-label">
+                      Where are you right now?{" "}
+                      <span className="ud-required">*</span>
+                    </label>
                     <div className="ud-option-grid cols-4">
-                      {LEVELS.map(l => (
-                        <button key={l.value} type="button"
-                          className={`ud-option-btn ${form.level === l.value ? 'selected' : ''}`}
-                          onClick={() => set('level', l.value)}>
+                      {LEVELS.map((l) => (
+                        <button
+                          key={l.value}
+                          type="button"
+                          className={`ud-option-btn ${
+                            form.level === l.value ? "selected" : ""
+                          }`}
+                          onClick={() => set("level", l.value)}
+                        >
                           <span className="ud-option-icon">{l.icon}</span>
                           <span className="ud-option-label">{l.label}</span>
                           <span className="ud-option-desc">{l.desc}</span>
@@ -339,12 +423,20 @@ export default function UserDetailsForm() {
                 <div className="ud-card">
                   <div className="ud-section-title">Daily Study Time</div>
                   <div className="ud-field">
-                    <label className="ud-label">How many hours daily? <span className="ud-required">*</span></label>
+                    <label className="ud-label">
+                      How many hours daily?{" "}
+                      <span className="ud-required">*</span>
+                    </label>
                     <div className="ud-option-grid cols-4">
-                      {HOURS.map(h => (
-                        <button key={h.value} type="button"
-                          className={`ud-option-btn ${form.hours === h.value ? 'selected' : ''}`}
-                          onClick={() => set('hours', h.value)}>
+                      {HOURS.map((h) => (
+                        <button
+                          key={h.value}
+                          type="button"
+                          className={`ud-option-btn ${
+                            form.hours === h.value ? "selected" : ""
+                          }`}
+                          onClick={() => set("hours", h.value)}
+                        >
                           <span className="ud-option-icon">{h.icon}</span>
                           <span className="ud-option-label">{h.label}</span>
                           <span className="ud-option-desc">{h.desc}</span>
@@ -355,13 +447,22 @@ export default function UserDetailsForm() {
                 </div>
 
                 <div className="ud-actions">
-                  <Link to={`/roles?category=${catId}`}
+                  <Link
+                    to={`/roles?category=${catId}`}
                     className="ud-btn-back"
-                    style={{ display:'inline-flex', alignItems:'center', textDecoration:'none' }}>
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      textDecoration: "none",
+                    }}
+                  >
                     ← Back
                   </Link>
-                  <button type="submit" className="ud-btn-submit"
-                    disabled={!form.name || !form.age || !form.level || !form.hours}>
+                  <button
+                    type="submit"
+                    className="ud-btn-submit"
+                    disabled={!form.age || !form.level || !form.hours}
+                  >
                     Continue →
                   </button>
                 </div>
@@ -371,15 +472,22 @@ export default function UserDetailsForm() {
             {/* ── STEP 2 ── */}
             {step === 2 && (
               <form onSubmit={submit}>
-
                 {/* Summary preview */}
                 <div className="ud-preview">
                   {[
-                    { icon:'👤', label:'Name',       val: form.name },
-                    { icon:'⚡', label:'Level',      val: LEVELS.find(l => l.value === form.level)?.label },
-                    { icon:'⏱', label:'Daily time', val: HOURS.find(h => h.value === form.hours)?.label  },
+                    { icon:'👤', label:'Name', val: userName },
+                    {
+                      icon: "⚡",
+                      label: "Level",
+                      val: LEVELS.find((l) => l.value === form.level)?.label,
+                    },
+                    {
+                      icon: "⏱",
+                      label: "Daily time",
+                      val: HOURS.find((h) => h.value === form.hours)?.label,
+                    },
                   ].map((item, i) => (
-                    <span key={item.label} style={{ display:'contents' }}>
+                    <span key={item.label} style={{ display: "contents" }}>
                       <div className="ud-preview-item">
                         <div className="ud-preview-icon">{item.icon}</div>
                         <div>
@@ -395,13 +503,22 @@ export default function UserDetailsForm() {
                 <div className="ud-card">
                   <div className="ud-section-title">Primary Goal</div>
                   <div className="ud-field">
-                    <label className="ud-label">What do you want to achieve? <span className="ud-required">*</span></label>
+                    <label className="ud-label">
+                      What do you want to achieve?{" "}
+                      <span className="ud-required">*</span>
+                    </label>
                     <div className="ud-option-grid cols-3">
-                      {GOALS.map(g => (
-                        <button key={g.value} type="button"
-                          className={`ud-goal-btn ${form.goal === g.value ? 'selected' : ''}`}
-                          onClick={() => set('goal', g.value)}>
-                          <span>{g.icon}</span>{g.label}
+                      {GOALS.map((g) => (
+                        <button
+                          key={g.value}
+                          type="button"
+                          className={`ud-goal-btn ${
+                            form.goal === g.value ? "selected" : ""
+                          }`}
+                          onClick={() => set("goal", g.value)}
+                        >
+                          <span>{g.icon}</span>
+                          {g.label}
                         </button>
                       ))}
                     </div>
@@ -411,27 +528,45 @@ export default function UserDetailsForm() {
                 <div className="ud-card">
                   <div className="ud-section-title">Target Timeline</div>
                   <div className="ud-field">
-                    <label className="ud-label">How many months to reach your goal?</label>
+                    <label className="ud-label">
+                      How many months to reach your goal?
+                    </label>
                     <div className="ud-slider-wrap">
                       <div className="ud-slider-labels">
-                        <div className="ud-slider-val">{form.timeline} months</div>
+                        <div className="ud-slider-val">
+                          {form.timeline} months
+                        </div>
                         <div className="ud-slider-hint">
-                          {form.timeline <= 3  ? 'Intensive 🔥'
-                           : form.timeline <= 6 ? 'Balanced ⚡'
-                           : form.timeline <= 9 ? 'Comfortable ☀️'
-                           : 'Relaxed 🌙'}
+                          {form.timeline <= 3
+                            ? "Intensive 🔥"
+                            : form.timeline <= 6
+                            ? "Balanced ⚡"
+                            : form.timeline <= 9
+                            ? "Comfortable ☀️"
+                            : "Relaxed 🌙"}
                         </div>
                       </div>
-                      <input type="range" className="ud-slider"
-                        min="1" max="18" step="1"
+                      <input
+                        type="range"
+                        className="ud-slider"
+                        min="1"
+                        max="18"
+                        step="1"
                         value={form.timeline}
-                        onChange={e => set('timeline', e.target.value)}
+                        onChange={(e) => set("timeline", e.target.value)}
                         style={{
-                          background:`linear-gradient(90deg, var(--primary) ${((form.timeline-1)/17)*100}%, var(--bg-3) ${((form.timeline-1)/17)*100}%)`
-                        }} />
+                          background: `linear-gradient(90deg, var(--primary) ${
+                            ((form.timeline - 1) / 17) * 100
+                          }%, var(--bg-3) ${
+                            ((form.timeline - 1) / 17) * 100
+                          }%)`,
+                        }}
+                      />
                       <div className="ud-slider-marks">
-                        {['1m','3m','6m','9m','12m','18m'].map(m => (
-                          <span key={m} className="ud-slider-mark">{m}</span>
+                        {["1m", "3m", "6m", "9m", "12m", "18m"].map((m) => (
+                          <span key={m} className="ud-slider-mark">
+                            {m}
+                          </span>
                         ))}
                       </div>
                     </div>
@@ -442,52 +577,63 @@ export default function UserDetailsForm() {
                   <div className="ud-section-title">Additional Context</div>
                   <div className="ud-field">
                     <label className="ud-label">
-                      Your background <span className="ud-optional">(optional)</span>
+                      Your background{" "}
+                      <span className="ud-optional">(optional)</span>
                     </label>
-                    <textarea className="ud-textarea"
+                    <textarea
+                      className="ud-textarea"
                       placeholder="e.g. CS graduate, 1 year IT support, familiar with Python basics..."
                       value={form.background}
-                      onChange={e => set('background', e.target.value)} />
+                      onChange={(e) => set("background", e.target.value)}
+                    />
                   </div>
                   <div className="ud-field">
                     <label className="ud-label">
-                      Special requests <span className="ud-optional">(optional)</span>
+                      Special requests{" "}
+                      <span className="ud-optional">(optional)</span>
                     </label>
-                    <textarea className="ud-textarea"
+                    <textarea
+                      className="ud-textarea"
                       placeholder="e.g. Focus on React & TypeScript, include system design..."
                       value={form.extra}
-                      onChange={e => set('extra', e.target.value)} />
+                      onChange={(e) => set("extra", e.target.value)}
+                    />
                   </div>
                 </div>
 
                 {/* Error */}
-                {error && (
-                  <div className="ud-error">
-                    ⚠️ {error}
-                  </div>
-                )}
+                {error && <div className="ud-error">⚠️ {error}</div>}
 
                 <div className="ud-actions">
-                  <button type="button" className="ud-btn-back" onClick={() => setStep(1)}>
+                  <button
+                    type="button"
+                    className="ud-btn-back"
+                    onClick={() => setStep(1)}
+                  >
                     ← Back
                   </button>
-                  <button type="submit" className="ud-btn-submit"
-                    disabled={!form.goal || loading}>
-                    {loading
-                      ? <><div className="ud-spinner" /> Generating your roadmap...</>
-                      : <>Generate my roadmap ✦</>
-                    }
+                  <button
+                    type="submit"
+                    className="ud-btn-submit"
+                    disabled={!form.goal || loading}
+                  >
+                    {loading ? (
+                      <>
+                        <div className="ud-spinner" /> Generating your
+                        roadmap...
+                      </>
+                    ) : (
+                      <>Generate my roadmap ✦</>
+                    )}
                   </button>
                 </div>
-
               </form>
             )}
-
           </div>
         </main>
 
         <Footer />
       </div>
     </>
-  )
+  );
 }

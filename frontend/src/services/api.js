@@ -10,7 +10,7 @@ const api = axios.create({
   withCredentials: true,
   
 })
-console.log("PRODUCTION BASE URL:", BASE_URL)
+
 
 /* Auto-attach Supabase JWT */
 api.interceptors.request.use(async (config) => {
