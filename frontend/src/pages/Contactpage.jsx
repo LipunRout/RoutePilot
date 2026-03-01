@@ -29,7 +29,7 @@ const FAQS = [
   },
 ]
 
-export default function ContactPage() {
+export default function Contactpage() {
   const [form, setForm]       = useState({ name: '', email: '', subject: '', message: '' })
   const [sending, setSending] = useState(false)
   const [sent, setSent]       = useState(false)
