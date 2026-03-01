@@ -1,13 +1,21 @@
 const nodemailer = require('nodemailer')
+const dns        = require('dns')
 require('dotenv').config()
+
+// ── Force IPv4 — fixes Render free tier IPv6 blocking ──
+dns.setDefaultResultOrder('ipv4first')
 
 const transporter = nodemailer.createTransport({
   host:   'smtp.gmail.com',
-  port:   465,
-  secure: true,
+  port:   587,        // ← changed from 465 to 587 (TLS, not SSL)
+  secure: false,      // ← changed from true to false
+  family: 4,          // ← force IPv4 socket
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false,
   },
 })
 
