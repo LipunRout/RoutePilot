@@ -44,6 +44,8 @@ const sendRoadmapEmail = async ({ to, name, roadmapTitle, pdfBuffer }) => {
   })
 
   console.log('[email] ✓ sent successfully via Brevo')
+  console.log('[email] BREVO_USER:', process.env.BREVO_USER ? 'SET' : 'MISSING')
+console.log('[email] BREVO_PASS:', process.env.BREVO_PASS ? 'SET' : 'MISSING')
 }
 
 module.exports = { sendRoadmapEmail }
