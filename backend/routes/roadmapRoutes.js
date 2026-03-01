@@ -1,5 +1,6 @@
 const express = require('express')
 const { requireAuth } = require('../middleware/authMiddleware')
+const { downloadPDF } = require('../controllers/downloadController')
 const {
   generateRoadmap,
   getRoadmaps,
@@ -9,6 +10,8 @@ const {
 } = require('../controllers/roadmapController')
 
 const router = express.Router()
+
+router.get('/api/download-pdf/:roadmapId', requireAuth, downloadPDF)
 
 router.post  ('/generate-roadmap',      requireAuth, generateRoadmap)
 router.get   ('/roadmaps',              requireAuth, getRoadmaps)
