@@ -1,31 +1,25 @@
 const nodemailer = require('nodemailer')
-const dns        = require('dns')
 require('dotenv').config()
 
-// Force IPv4
-dns.setDefaultResultOrder('ipv4first')
-
-// Try ports in order: 2525 → 587 → 465
-const createTransporter = (port, secure) => nodemailer.createTransport({
-  host:   'smtp.gmail.com',
-  port,
-  secure,
-  family: 4,
+// Brevo SMTP — works on Render free tier (no IPv6 issues)
+const transporter = nodemailer.createTransport({
+  host:   'smtp-relay.brevo.com',
+  port:   587,
+  secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.BREVO_USER,   // your Brevo login email
+    pass: process.env.BREVO_PASS,   // Brevo SMTP key (xsmtp...)
   },
   tls: { rejectUnauthorized: false },
-  connectionTimeout: 10000,
-  greetingTimeout:   10000,
-  socketTimeout:     15000,
 })
 
 const sendRoadmapEmail = async ({ to, name, roadmapTitle, pdfBuffer }) => {
   const title = roadmapTitle || 'Career'
 
-  const mailOptions = {
-    from:    `"RoutePilot" <${process.env.EMAIL_USER}>`,
+  console.log('[email] sending via Brevo to:', to)
+
+  await transporter.sendMail({
+    from:    '"RoutePilot" <noreply@routepilot.com>',  // can be any from address on Brevo
     to,
     subject: `Your ${title} Roadmap — RoutePilot`,
     html: `
@@ -47,30 +41,9 @@ const sendRoadmapEmail = async ({ to, name, roadmapTitle, pdfBuffer }) => {
       content:     pdfBuffer,
       contentType: 'application/pdf',
     }] : [],
-  }
+  })
 
-  // Try each port in order until one works
-  const attempts = [
-    { port: 2525, secure: false },
-    { port: 587,  secure: false },
-    { port: 465,  secure: true  },
-  ]
-
-  let lastError
-  for (const { port, secure } of attempts) {
-    try {
-      console.log(`[email] trying port ${port}...`)
-      const t = createTransporter(port, secure)
-      await t.sendMail(mailOptions)
-      console.log(`[email] ✓ sent via port ${port}`)
-      return
-    } catch (err) {
-      console.log(`[email] port ${port} failed: ${err.message}`)
-      lastError = err
-    }
-  }
-
-  throw lastError
+  console.log('[email] ✓ sent successfully via Brevo')
 }
 
 module.exports = { sendRoadmapEmail }
