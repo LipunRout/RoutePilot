@@ -2,26 +2,29 @@ const nodemailer = require('nodemailer')
 const dns        = require('dns')
 require('dotenv').config()
 
-// ── Force IPv4 — fixes Render free tier IPv6 blocking ──
+// Force IPv4
 dns.setDefaultResultOrder('ipv4first')
 
-const transporter = nodemailer.createTransport({
+// Try ports in order: 2525 → 587 → 465
+const createTransporter = (port, secure) => nodemailer.createTransport({
   host:   'smtp.gmail.com',
-  port:   587,        // ← changed from 465 to 587 (TLS, not SSL)
-  secure: false,      // ← changed from true to false
-  family: 4,          // ← force IPv4 socket
+  port,
+  secure,
+  family: 4,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  tls: {
-    rejectUnauthorized: false,
-  },
+  tls: { rejectUnauthorized: false },
+  connectionTimeout: 10000,
+  greetingTimeout:   10000,
+  socketTimeout:     15000,
 })
 
 const sendRoadmapEmail = async ({ to, name, roadmapTitle, pdfBuffer }) => {
   const title = roadmapTitle || 'Career'
-  await transporter.sendMail({
+
+  const mailOptions = {
     from:    `"RoutePilot" <${process.env.EMAIL_USER}>`,
     to,
     subject: `Your ${title} Roadmap — RoutePilot`,
@@ -44,7 +47,30 @@ const sendRoadmapEmail = async ({ to, name, roadmapTitle, pdfBuffer }) => {
       content:     pdfBuffer,
       contentType: 'application/pdf',
     }] : [],
-  })
+  }
+
+  // Try each port in order until one works
+  const attempts = [
+    { port: 2525, secure: false },
+    { port: 587,  secure: false },
+    { port: 465,  secure: true  },
+  ]
+
+  let lastError
+  for (const { port, secure } of attempts) {
+    try {
+      console.log(`[email] trying port ${port}...`)
+      const t = createTransporter(port, secure)
+      await t.sendMail(mailOptions)
+      console.log(`[email] ✓ sent via port ${port}`)
+      return
+    } catch (err) {
+      console.log(`[email] port ${port} failed: ${err.message}`)
+      lastError = err
+    }
+  }
+
+  throw lastError
 }
 
 module.exports = { sendRoadmapEmail }
