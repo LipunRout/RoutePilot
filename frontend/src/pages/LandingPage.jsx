@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
-
-
 const useInView = (threshold = 0.15) => {
   const ref = useRef(null)
   const [inView, setInView] = useState(false)
@@ -36,13 +34,18 @@ const useCounter = (target, duration = 2000, active = false) => {
 }
 
 const ROLES = [
-  'Frontend Developer',
-  'Data Analyst',
-  'AI/ML Engineer',
-  'Full Stack Developer',
-  'DevOps Engineer',
-  'UI/UX Designer',
-]
+  
+  'Software Engineer',
+
+
+  'Mechanical Engineer',
+
+
+  'Civil Services Officer',
+
+
+  'Business Analyst'
+];
 
 const FEATURES = [
   { icon: '⚡', title: 'AI-Generated Roadmaps', desc: 'Gemini AI creates a structured, phase-by-phase plan tailored to your level and timeline.' },
@@ -67,19 +70,17 @@ const TESTIMONIALS = [
 ]
 
 export default function LandingPage() {
-  const [showPopup, setShowPopup] = useState(false)
   const [roleIdx, setRoleIdx] = useState(0)
-  const [typed, setTyped]   = useState('')
-  const [statsRef, statsIn] = useInView(0.3)
-  const [featRef,  featIn]  = useInView(0.1)
-  const [stepsRef, stepsIn] = useInView(0.1)
+  const [typed, setTyped]     = useState('')
+  const [statsRef, statsIn]   = useInView(0.3)
+  const [featRef,  featIn]    = useInView(0.1)
+  const [stepsRef, stepsIn]   = useInView(0.1)
 
   const c1 = useCounter(15000, 2200, statsIn)
   const c2 = useCounter(50000, 2200, statsIn)
   const c3 = useCounter(25,    1800, statsIn)
   const c4 = useCounter(92,    1800, statsIn)
 
-  /* typing effect */
   useEffect(() => {
     const role = ROLES[roleIdx % ROLES.length]
     let i = 0
@@ -91,18 +92,16 @@ export default function LandingPage() {
     return () => clearInterval(t)
   }, [roleIdx])
 
-  useEffect(() => {
-    const t = setTimeout(() => setShowPopup(true), 1800)
-    return () => clearTimeout(t)
-  }, [])
-
   return (
     <>
       <style>{`
+        /* ── FONTS ── */
+        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+        .lp, .lp * { box-sizing: border-box; }
+
         /* ── PAGE ── */
         .lp { background: var(--bg); min-height: 100vh; }
 
-        /* ── NOISE OVERLAY ── */
         .lp::before {
           content:'';
           position:fixed; inset:0;
@@ -113,13 +112,9 @@ export default function LandingPage() {
         /* ── HERO ── */
         .hero {
           min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: flex; align-items: center; justify-content: center;
           padding: 120px 24px 80px;
-          position: relative;
-          overflow: hidden;
-          text-align: center;
+          position: relative; overflow: hidden; text-align: center;
         }
 
         .hero-grid {
@@ -132,520 +127,309 @@ export default function LandingPage() {
         }
 
         .hero-radial {
-          position:absolute;
-          width:700px; height:700px;
-          border-radius:50%;
+          position:absolute; width:700px; height:700px; border-radius:50%;
           background: radial-gradient(circle, rgba(0,201,122,0.07) 0%, transparent 65%);
-          top:50%; left:50%;
-          transform:translate(-50%,-50%);
-          pointer-events:none;
+          top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;
         }
 
-        .hero-inner {
-          max-width: 760px;
-          position:relative; z-index:1;
-        }
+        .hero-inner { max-width: 760px; position:relative; z-index:1; }
 
-        .hero-badge {
-          margin-bottom: 28px;
-          animation: fadeUp 0.6s ease both;
-        }
+        .hero-badge { margin-bottom: 28px; animation: fadeUp 0.6s ease both; }
 
+        /* ── HERO TITLE: Inter bold + Cormorant italic ── */
         .hero-title {
+          font-family: 'Inter', sans-serif;
           font-size: clamp(2.4rem, 5.5vw, 4rem);
           font-weight: 700;
           letter-spacing: -0.05em;
-          line-height: 1.1;
+          line-height: 1.12;
           color: var(--text-1);
           margin-bottom: 20px;
           animation: fadeUp 0.6s ease 0.1s both;
         }
 
+        /* Cormorant italic for the emotional keyword */
         .hero-title em {
-          font-style: normal;
+          font-family: 'Libre Baskerville', serif;
+          font-style: italic;
+          font-weight: 600;
+          font-size: 1.12em;
           background: linear-gradient(135deg, #00c97a 30%, #0ea5e9 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
+          letter-spacing: -0.03em;
         }
 
         .hero-typed-row {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          margin-bottom: 22px;
-          animation: fadeUp 0.6s ease 0.2s both;
-          flex-wrap: wrap;
+          display: flex; align-items: center; justify-content: center;
+          gap: 10px; margin-bottom: 22px;
+          animation: fadeUp 0.6s ease 0.2s both; flex-wrap: wrap;
         }
 
         .hero-typed-label {
-          font-size: 1.05rem;
-          color: var(--text-2);
-          font-weight: 400;
+          font-family: 'Inter', sans-serif;
+          font-size: 1.05rem; color: var(--text-2); font-weight: 400;
         }
 
         .hero-typed {
-          font-size: 1.05rem;
-          font-weight: 600;
-          color: var(--primary);
-          min-width: 220px;
-          text-align: left;
+          font-family: 'Inter', sans-serif;
+          font-size: 1.05rem; font-weight: 600;
+          color: var(--primary); min-width: 220px; text-align: left;
         }
 
         .cursor {
-          display: inline-block;
-          width: 2px;
-          height: 1.1em;
-          background: var(--primary);
-          margin-left: 2px;
-          vertical-align: middle;
-          animation: blink 0.9s step-end infinite;
+          display: inline-block; width: 2px; height: 1.1em;
+          background: var(--primary); margin-left: 2px;
+          vertical-align: middle; animation: blink 0.9s step-end infinite;
         }
 
         .hero-desc {
-          font-size: 1.05rem;
-          color: var(--text-2);
-          line-height: 1.75;
-          max-width: 560px;
-          margin: 0 auto 32px;
+          font-family: 'Inter', sans-serif;
+          font-size: 1.05rem; color: var(--text-2); line-height: 1.75;
+          max-width: 560px; margin: 0 auto 32px;
           animation: fadeUp 0.6s ease 0.3s both;
         }
 
         .hero-cta {
-          display: flex;
-          gap: 12px;
-          justify-content: center;
-          flex-wrap: wrap;
-          animation: fadeUp 0.6s ease 0.4s both;
-          margin-bottom: 60px;
+          display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+          animation: fadeUp 0.6s ease 0.4s both; margin-bottom: 60px;
         }
 
-        /* Hero image */
         .hero-img-wrap {
-          position: relative;
-          animation: fadeUp 0.7s ease 0.5s both;
-          max-width: 860px;
-          margin: 0 auto;
+          position: relative; animation: fadeUp 0.7s ease 0.5s both;
+          max-width: 860px; margin: 0 auto;
         }
 
         .hero-img {
-          width: 100%;
-          height: 420px;
-          object-fit: cover;
-          border-radius: 14px;
-          border: 1px solid var(--border);
-          box-shadow: 0 0 0 1px var(--border), 0 32px 80px rgba(0,0,0,0.5);
-          display: block;
+          width: 100%; height: 420px; object-fit: cover;
+          border-radius: 14px; border: 1px solid var(--border);
+          box-shadow: 0 0 0 1px var(--border), 0 32px 80px rgba(0,0,0,0.5); display: block;
         }
 
-        /* Floating chips */
         .chip {
-          position: absolute;
-          background: var(--bg-2);
-          border: 1px solid var(--border);
-          border-radius: 10px;
-          padding: 10px 14px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          box-shadow: var(--shadow);
-          backdrop-filter: blur(12px);
+          position: absolute; background: var(--bg-2); border: 1px solid var(--border);
+          border-radius: 10px; padding: 10px 14px;
+          display: flex; align-items: center; gap: 10px;
+          box-shadow: var(--shadow); backdrop-filter: blur(12px);
         }
 
         .chip-1 { top: 24px; left: -16px; animation: float 5s ease-in-out infinite; }
         .chip-2 { bottom: 32px; right: -16px; animation: float 6s ease-in-out infinite reverse; }
-
         .chip-icon { font-size: 1.2rem; }
-
-        .chip-main {
-          font-size: 0.82rem;
-          font-weight: 600;
-          color: var(--text-1);
-          line-height: 1.3;
-        }
-
-        .chip-sub {
-          font-size: 0.72rem;
-          color: var(--text-2);
-        }
+        .chip-main { font-size: 0.82rem; font-weight: 600; color: var(--text-1); line-height: 1.3; }
+        .chip-sub  { font-size: 0.72rem; color: var(--text-2); }
 
         /* ── STATS ── */
-        .stats {
-          padding: 64px 24px;
-          position: relative; z-index:1;
-        }
+        .stats { padding: 64px 24px; position: relative; z-index:1; }
 
         .stats-inner {
-          max-width: 1000px;
-          margin: 0 auto;
-          display: grid;
-          grid-template-columns: repeat(4,1fr);
-          gap: 1px;
-          background: var(--border);
-          border: 1px solid var(--border);
-          border-radius: var(--radius-lg);
-          overflow: hidden;
+          max-width: 1000px; margin: 0 auto;
+          display: grid; grid-template-columns: repeat(4,1fr);
+          gap: 1px; background: var(--border);
+          border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden;
         }
 
         .stat-cell {
-          background: var(--bg-1);
-          padding: 32px 24px;
-          text-align: center;
-          transition: background 0.2s;
-          opacity: 0;
-          transform: translateY(12px);
+          background: var(--bg-1); padding: 32px 24px; text-align: center;
+          transition: background 0.2s; opacity: 0; transform: translateY(12px);
         }
-
-        .stat-cell.show {
-          animation: fadeUp 0.5s ease both;
-        }
-
+        .stat-cell.show { animation: fadeUp 0.5s ease both; }
         .stat-cell:hover { background: var(--bg-2); }
 
+        /* Stat numbers in Cormorant for elegance */
         .stat-num {
-          font-size: clamp(1.8rem, 3vw, 2.4rem);
-          font-weight: 700;
-          letter-spacing: -0.04em;
-          color: var(--text-1);
-          line-height: 1;
-          margin-bottom: 6px;
+          font-family: 'Libre Baskerville', serif;
+          font-size: clamp(2rem, 3.5vw, 2.8rem);
+          font-weight: 600; font-style: italic;
+          letter-spacing: -0.02em; color: var(--text-1);
+          line-height: 1; margin-bottom: 6px;
         }
-
-        .stat-num span { color: var(--primary); }
-
-        .stat-lbl {
-          font-size: 0.8rem;
-          color: var(--text-2);
-          font-weight: 400;
-        }
+        .stat-num span { color: var(--primary); font-style: normal; }
+        .stat-lbl { font-family: 'Inter', sans-serif; font-size: 0.8rem; color: var(--text-2); font-weight: 400; }
 
         /* ── FEATURES ── */
-        .features {
-          padding: 80px 24px;
-          position: relative; z-index:1;
-        }
-
+        .features { padding: 80px 24px; position: relative; z-index:1; }
         .features-inner { max-width: 1000px; margin: 0 auto; }
-
-        .section-header {
-          margin-bottom: 48px;
-        }
+        .section-header { margin-bottom: 48px; }
 
         .features-grid {
-          display: grid;
-          grid-template-columns: repeat(3,1fr);
-          gap: 1px;
-          background: var(--border);
-          border: 1px solid var(--border);
-          border-radius: var(--radius-lg);
-          overflow: hidden;
+          display: grid; grid-template-columns: repeat(3,1fr);
+          gap: 1px; background: var(--border);
+          border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden;
         }
 
         .feat-card {
-          background: var(--bg-1);
-          padding: 28px 24px;
-          transition: background 0.2s;
-          opacity: 0;
-          transform: translateY(12px);
+          background: var(--bg-1); padding: 28px 24px;
+          transition: background 0.2s; opacity: 0; transform: translateY(12px);
         }
-
-        .feat-card.show {
-          animation: fadeUp 0.5s ease both;
-        }
-
+        .feat-card.show { animation: fadeUp 0.5s ease both; }
         .feat-card:hover { background: var(--bg-2); }
 
-        .feat-icon {
-          font-size: 1.1rem;
-          color: var(--primary);
-          margin-bottom: 14px;
-          display: block;
-        }
+        .feat-icon { font-size: 1.1rem; color: var(--primary); margin-bottom: 14px; display: block; }
 
         .feat-title {
-          font-size: 0.925rem;
-          font-weight: 600;
-          color: var(--text-1);
-          margin-bottom: 8px;
-          letter-spacing: -0.02em;
+          font-family: 'Inter', sans-serif;
+          font-size: 0.925rem; font-weight: 600; color: var(--text-1);
+          margin-bottom: 8px; letter-spacing: -0.02em;
+        }
+        .feat-desc { font-family: 'Inter', sans-serif; font-size: 0.85rem; color: var(--text-2); line-height: 1.65; }
+
+        /* ── SECTION TITLES: Inter + Cormorant em ── */
+        .section-title {
+          font-family: 'Inter', sans-serif;
+          font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+          font-weight: 700; letter-spacing: -0.04em;
+          color: var(--text-1); margin-bottom: 0.75rem; line-height: 1.15;
         }
 
-        .feat-desc {
-          font-size: 0.85rem;
-          color: var(--text-2);
-          line-height: 1.65;
+        .section-title em {
+          font-family: 'Libre Baskerville', serif;
+          font-style: italic; font-weight: 600; font-size: 1.08em;
+          background: linear-gradient(135deg, #00c97a 30%, #0ea5e9 100%);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+          background-clip: text; letter-spacing: -0.02em;
+        }
+
+        /* keep gradient-text for span usage */
+        .gradient-text {
+          font-family: 'Libre Baskerville', serif;
+          font-style: italic; font-weight: 600; font-size: 1.08em;
+          background: linear-gradient(135deg, #00c97a 30%, #0ea5e9 100%);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+          background-clip: text; letter-spacing: -0.02em;
         }
 
         /* ── STEPS ── */
-        .steps {
-          padding: 80px 24px;
-          position: relative; z-index:1;
-        }
-
+        .steps { padding: 80px 24px; position: relative; z-index:1; }
         .steps-inner { max-width: 1000px; margin: 0 auto; }
 
-        .steps-grid {
-          display: grid;
-          grid-template-columns: repeat(4,1fr);
-          gap: 16px;
-        }
+        .steps-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
 
         .step-card {
-          background: var(--bg-1);
-          border: 1px solid var(--border);
-          border-radius: var(--radius-lg);
-          padding: 24px 20px;
-          position: relative;
-          transition: all 0.2s ease;
-          opacity: 0;
-          transform: translateY(12px);
+          background: var(--bg-1); border: 1px solid var(--border);
+          border-radius: var(--radius-lg); padding: 24px 20px;
+          position: relative; transition: all 0.2s ease; opacity: 0; transform: translateY(12px);
         }
-
-        .step-card.show {
-          animation: fadeUp 0.5s ease both;
-        }
-
-        .step-card:hover {
-          border-color: var(--border-hover);
-          background: var(--bg-2);
-          transform: translateY(-3px);
-          box-shadow: var(--shadow);
-        }
+        .step-card.show { animation: fadeUp 0.5s ease both; }
+        .step-card:hover { border-color: var(--border-hover); background: var(--bg-2); transform: translateY(-3px); box-shadow: var(--shadow); }
 
         .step-num {
-          font-size: 0.72rem;
-          font-weight: 600;
-          letter-spacing: 0.08em;
-          color: var(--text-3);
-          text-transform: uppercase;
-          margin-bottom: 16px;
+          font-family: 'Libre Baskerville', serif;
+          font-size: 1.6rem; font-style: italic; font-weight: 600;
+          color: var(--primary); opacity: 0.5; margin-bottom: 12px; line-height: 1;
         }
 
         .step-title {
-          font-size: 0.925rem;
-          font-weight: 600;
-          color: var(--text-1);
-          margin-bottom: 8px;
-          letter-spacing: -0.02em;
+          font-family: 'Inter', sans-serif;
+          font-size: 0.925rem; font-weight: 600; color: var(--text-1);
+          margin-bottom: 8px; letter-spacing: -0.02em;
         }
+        .step-desc { font-family: 'Inter', sans-serif; font-size: 0.82rem; color: var(--text-2); line-height: 1.6; }
 
-        .step-desc {
-          font-size: 0.82rem;
-          color: var(--text-2);
-          line-height: 1.6;
-        }
-
-        .step-line {
-          position: absolute;
-          top: 36px;
-          right: -8px;
-          width: 16px;
-          height: 1px;
-          background: var(--border);
-          z-index: 2;
-        }
+        .step-line { position: absolute; top: 36px; right: -8px; width: 16px; height: 1px; background: var(--border); z-index: 2; }
 
         /* ── SHOWCASE ── */
-        .showcase {
-          padding: 80px 24px;
-          position: relative; z-index:1;
-        }
+        .showcase { padding: 80px 24px; position: relative; z-index:1; }
 
         .showcase-inner {
-          max-width: 1000px;
-          margin: 0 auto;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 64px;
-          align-items: center;
+          max-width: 1000px; margin: 0 auto;
+          display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
         }
 
         .showcase-label { margin-bottom: 14px; }
 
         .showcase-title {
+          font-family: 'Inter', sans-serif;
           font-size: clamp(1.5rem, 2.5vw, 2.2rem);
-          font-weight: 700;
-          letter-spacing: -0.04em;
-          margin-bottom: 14px;
+          font-weight: 700; letter-spacing: -0.04em; margin-bottom: 14px; line-height: 1.2;
         }
 
-        .showcase-desc {
-          font-size: 0.925rem;
-          color: var(--text-2);
-          line-height: 1.75;
-          margin-bottom: 28px;
+        .showcase-title em {
+          font-family: 'Libre Baskerville', serif;
+          font-style: italic; font-weight: 600; font-size: 1.08em;
+          background: linear-gradient(135deg, #00c97a 30%, #0ea5e9 100%);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
 
-        .check-list {
-          list-style: none;
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          margin-bottom: 32px;
-        }
+        .showcase-desc { font-family: 'Inter', sans-serif; font-size: 0.925rem; color: var(--text-2); line-height: 1.75; margin-bottom: 28px; }
 
-        .check-list li {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          font-size: 0.875rem;
-          color: var(--text-2);
-        }
-
+        .check-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+        .check-list li { display: flex; align-items: center; gap: 10px; font-family: 'Inter', sans-serif; font-size: 0.875rem; color: var(--text-2); }
         .check-list li::before {
-          content: '✓';
-          width: 20px; height: 20px;
-          background: var(--primary-dim);
-          border: 1px solid var(--primary-border);
-          border-radius: 6px;
-          color: var(--primary);
-          font-size: 0.7rem;
-          font-weight: 700;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
+          content: '✓'; width: 20px; height: 20px;
+          background: var(--primary-dim); border: 1px solid var(--primary-border);
+          border-radius: 6px; color: var(--primary); font-size: 0.7rem; font-weight: 700;
+          display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
 
-        .showcase-img-wrap {
-          border-radius: var(--radius-lg);
-          overflow: hidden;
-          border: 1px solid var(--border);
-          box-shadow: var(--shadow);
-        }
-
-        .showcase-img {
-          width: 100%;
-          height: 320px;
-          object-fit: cover;
-          display: block;
-          transition: transform 0.4s ease;
-        }
-
-        .showcase-img-wrap:hover .showcase-img {
-          transform: scale(1.02);
-        }
+        .showcase-img-wrap { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .showcase-img { width: 100%; height: 320px; object-fit: cover; display: block; transition: transform 0.4s ease; }
+        .showcase-img-wrap:hover .showcase-img { transform: scale(1.02); }
 
         /* ── TESTIMONIALS ── */
-        .testimonials {
-          padding: 80px 24px;
-          position: relative; z-index:1;
-        }
-
+        .testimonials { padding: 80px 24px; position: relative; z-index:1; }
         .testimonials-inner { max-width: 1000px; margin: 0 auto; }
 
-        .testi-grid {
-          display: grid;
-          grid-template-columns: repeat(3,1fr);
-          gap: 16px;
-        }
+        .testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
 
         .testi-card {
-          background: var(--bg-1);
-          border: 1px solid var(--border);
-          border-radius: var(--radius-lg);
-          padding: 24px;
-          transition: all 0.2s ease;
+          background: var(--bg-1); border: 1px solid var(--border);
+          border-radius: var(--radius-lg); padding: 24px; transition: all 0.2s ease;
         }
+        .testi-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow); transform: translateY(-3px); }
 
-        .testi-card:hover {
-          border-color: var(--border-hover);
-          box-shadow: var(--shadow);
-          transform: translateY(-3px);
-        }
+        .testi-stars { font-size: 0.75rem; letter-spacing: 2px; margin-bottom: 14px; color: #f5a623; }
 
-        .testi-stars {
-          font-size: 0.75rem;
-          letter-spacing: 2px;
-          margin-bottom: 14px;
-          color: #f5a623;
-        }
-
+        /* Testimonial quote in Cormorant for editorial feel */
         .testi-text {
-          font-size: 0.875rem;
-          color: var(--text-2);
-          line-height: 1.7;
-          margin-bottom: 20px;
+          font-family: 'Libre Baskerville', serif;
+          font-size: 1rem; font-style: italic; font-weight: 400;
+          color: var(--text-2); line-height: 1.75; margin-bottom: 20px;
         }
 
-        .testi-author {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
+        .testi-author { display: flex; align-items: center; gap: 10px; }
         .testi-avatar {
-          width: 36px; height: 36px;
-          border-radius: 50%;
+          width: 36px; height: 36px; border-radius: 50%;
           background: linear-gradient(135deg, #00c97a, #0ea5e9);
           display: flex; align-items: center; justify-content: center;
-          font-size: 0.7rem;
-          font-weight: 700;
-          color: #000;
-          flex-shrink: 0;
-          letter-spacing: 0.5px;
+          font-family: 'Inter', sans-serif;
+          font-size: 0.7rem; font-weight: 700; color: #000; flex-shrink: 0; letter-spacing: 0.5px;
         }
-
-        .testi-name {
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: var(--text-1);
-          letter-spacing: -0.01em;
-        }
-
-        .testi-role {
-          font-size: 0.75rem;
-          color: var(--text-3);
-          margin-top: 1px;
-        }
+        .testi-name { font-family: 'Inter', sans-serif; font-size: 0.875rem; font-weight: 600; color: var(--text-1); letter-spacing: -0.01em; }
+        .testi-role { font-family: 'Inter', sans-serif; font-size: 0.75rem; color: var(--text-3); margin-top: 1px; }
 
         /* ── CTA ── */
-        .cta-section {
-          padding: 80px 24px 100px;
-          position: relative; z-index:1;
-        }
+        .cta-section { padding: 80px 24px 100px; position: relative; z-index:1; }
 
         .cta-inner {
-          max-width: 600px;
-          margin: 0 auto;
-          text-align: center;
-          background: var(--bg-1);
-          border: 1px solid var(--border);
-          border-radius: 20px;
-          padding: 56px 40px;
-          position: relative;
-          overflow: hidden;
+          max-width: 600px; margin: 0 auto; text-align: center;
+          background: var(--bg-1); border: 1px solid var(--border);
+          border-radius: 20px; padding: 56px 40px; position: relative; overflow: hidden;
         }
 
         .cta-inner::before {
-          content:'';
-          position:absolute;
-          top:-1px; left:15%; right:15%;
-          height:1px;
+          content:''; position:absolute; top:-1px; left:15%; right:15%; height:1px;
           background: linear-gradient(90deg, transparent, var(--primary), transparent);
         }
 
         .cta-title {
+          font-family: 'Inter', sans-serif;
           font-size: clamp(1.6rem, 3vw, 2.2rem);
-          font-weight: 700;
-          letter-spacing: -0.04em;
-          margin-bottom: 12px;
+          font-weight: 700; letter-spacing: -0.04em; margin-bottom: 12px; line-height: 1.2;
         }
 
-        .cta-desc {
-          font-size: 0.95rem;
-          color: var(--text-2);
-          line-height: 1.7;
-          margin-bottom: 32px;
+        .cta-title em {
+          font-family: 'Libre Baskerville', serif;
+          font-style: italic; font-weight: 600; font-size: 1.1em;
+          background: linear-gradient(135deg, #00c97a 30%, #0ea5e9 100%);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
 
-        .cta-btns {
-          display: flex;
-          gap: 12px;
-          justify-content: center;
-          flex-wrap: wrap;
-        }
+        .cta-desc { font-family: 'Inter', sans-serif; font-size: 0.95rem; color: var(--text-2); line-height: 1.7; margin-bottom: 32px; }
+        .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
         /* ── RESPONSIVE ── */
         @media (max-width: 1024px) {
@@ -664,14 +448,7 @@ export default function LandingPage() {
           .chip-1, .chip-2 { display: none; }
           .cta-inner { padding: 40px 24px; }
           .hero-img { height: 240px; }
-                  .hero-typed {
-          font-size: 1.05rem;
-          font-weight: 600;
-          color: var(--primary);
-          min-width: 220px;
-          text-align: center;
-        }
-
+          .hero-typed { text-align: center; }
         }
 
         @media (max-width: 480px) {
@@ -681,7 +458,6 @@ export default function LandingPage() {
       `}</style>
 
       <div className="lp">
-        
         <Navbar />
 
         {/* ── HERO ── */}
@@ -697,6 +473,7 @@ export default function LandingPage() {
               </span>
             </div>
 
+            {/* Inter bold + Cormorant italic on key phrase */}
             <h1 className="hero-title">
               The smartest way to<br />
               <em>plan your career</em>
@@ -710,17 +487,14 @@ export default function LandingPage() {
             </div>
 
             <p className="hero-desc">
-              Stop guessing. RoutePilot uses Gemini AI to generate a structured,
-              phase-by-phase roadmap based on your goals, level and available time.
-            </p>
+  Stop guessing your path. RoutePilot is powered by intelligent AI that
+  creates a structured, step-by-step roadmap aligned with your goals,
+  experience, and available time.
+</p>
 
             <div className="hero-cta">
-              <Link to="/register" className="btn btn-primary btn-lg">
-                Get started free →
-              </Link>
-              <Link to="/login" className="btn btn-secondary btn-lg">
-                Sign in
-              </Link>
+              <Link to="/register" className="btn btn-primary btn-lg">Get started free →</Link>
+              <Link to="/login"    className="btn btn-secondary btn-lg">Sign in</Link>
             </div>
 
             <div className="hero-img-wrap">
@@ -757,14 +531,8 @@ export default function LandingPage() {
               { n: c3, s: '+', l: 'Career paths' },
               { n: c4, s: '%', l: 'Success rate' },
             ].map((s, i) => (
-              <div
-                key={i}
-                className={`stat-cell ${statsIn ? 'show' : ''}`}
-                style={{ animationDelay: `${i * 0.08}s` }}
-              >
-                <div className="stat-num">
-                  {s.n.toLocaleString()}<span>{s.s}</span>
-                </div>
+              <div key={i} className={`stat-cell ${statsIn ? 'show' : ''}`} style={{ animationDelay:`${i*0.08}s` }}>
+                <div className="stat-num">{s.n.toLocaleString()}<span>{s.s}</span></div>
                 <div className="stat-lbl">{s.l}</div>
               </div>
             ))}
@@ -778,16 +546,12 @@ export default function LandingPage() {
               <div className="section-label">Features</div>
               <h2 className="section-title">
                 Everything you need to<br />
-                <span className="gradient-text">build your career</span>
+                <em>build your career</em>
               </h2>
             </div>
             <div className="features-grid">
               {FEATURES.map((f, i) => (
-                <div
-                  key={i}
-                  className={`feat-card ${featIn ? 'show' : ''}`}
-                  style={{ animationDelay: `${i * 0.07}s` }}
-                >
+                <div key={i} className={`feat-card ${featIn ? 'show' : ''}`} style={{ animationDelay:`${i*0.07}s` }}>
                   <span className="feat-icon">{f.icon}</span>
                   <div className="feat-title">{f.title}</div>
                   <div className="feat-desc">{f.desc}</div>
@@ -803,18 +567,14 @@ export default function LandingPage() {
             <div className="section-header">
               <div className="section-label">How it works</div>
               <h2 className="section-title">
-                Your roadmap in <span className="gradient-text">4 steps</span>
+                Your roadmap in <em>4 steps</em>
               </h2>
             </div>
             <div className="steps-grid">
               {STEPS.map((s, i) => (
-                <div
-                  key={i}
-                  className={`step-card ${stepsIn ? 'show' : ''}`}
-                  style={{ animationDelay: `${i * 0.08}s` }}
-                >
+                <div key={i} className={`step-card ${stepsIn ? 'show' : ''}`} style={{ animationDelay:`${i*0.08}s` }}>
                   {i < STEPS.length - 1 && <div className="step-line" />}
-                  <div className="step-num">Step {s.n}</div>
+                  <div className="step-num">{s.n}</div>
                   <div className="step-title">{s.title}</div>
                   <div className="step-desc">{s.desc}</div>
                 </div>
@@ -832,7 +592,7 @@ export default function LandingPage() {
               </div>
               <h2 className="showcase-title">
                 Structured paths.<br />
-                <span className="gradient-text">Proven outcomes.</span>
+                <em>Proven outcomes.</em>
               </h2>
               <p className="showcase-desc">
                 Every roadmap is uniquely built by Gemini AI around your inputs —
@@ -845,9 +605,7 @@ export default function LandingPage() {
                 <li>Project ideas for your portfolio</li>
                 <li>Full PDF export to your email</li>
               </ul>
-              <Link to="/register" className="btn btn-primary btn-lg">
-                Generate my roadmap →
-              </Link>
+              <Link to="/register" className="btn btn-primary btn-lg">Generate my roadmap →</Link>
             </div>
             <div className="showcase-img-wrap">
               <img
@@ -865,14 +623,14 @@ export default function LandingPage() {
             <div className="section-header">
               <div className="section-label">Testimonials</div>
               <h2 className="section-title">
-                Trusted by <span className="gradient-text">thousands</span>
+                Trusted by <em>thousands</em>
               </h2>
             </div>
             <div className="testi-grid">
               {TESTIMONIALS.map((t, i) => (
                 <div className="testi-card" key={i}>
                   <div className="testi-stars">★★★★★</div>
-                  <p className="testi-text">{t.text}</p>
+                  <p className="testi-text">"{t.text}"</p>
                   <div className="testi-author">
                     <div className="testi-avatar">{t.avatar}</div>
                     <div>
@@ -891,19 +649,15 @@ export default function LandingPage() {
           <div className="cta-inner">
             <h2 className="cta-title">
               Ready to find your<br />
-              <span className="gradient-text">career direction?</span>
+              <em>career direction?</em>
             </h2>
             <p className="cta-desc">
               Join 15,000+ students who stopped guessing and started growing.
               Your personalized roadmap takes less than 2 minutes.
             </p>
             <div className="cta-btns">
-              <Link to="/register" className="btn btn-primary btn-lg">
-                Get started free →
-              </Link>
-              <Link to="/login" className="btn btn-secondary btn-lg">
-                I have an account
-              </Link>
+              <Link to="/register" className="btn btn-primary btn-lg">Get started free →</Link>
+              <Link to="/login"    className="btn btn-secondary btn-lg">I have an account</Link>
             </div>
           </div>
         </section>

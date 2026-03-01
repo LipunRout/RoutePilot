@@ -65,7 +65,7 @@ export default function LoginPage() {
           min-height: calc(100vh - 64px);
           margin-top: 64px;
         }
-
+        
         /* ══════════════════════════
            LEFT PANEL
         ══════════════════════════ */
@@ -624,7 +624,9 @@ export default function LoginPage() {
           .lp-right { padding: 32px 20px; }
           .lp-form-title { font-size: 1.4rem; }
           .lp-form-title-accent { font-size: 1.55rem; }
+          
         }
+        
       `}</style>
 
       <div className="lp-page">

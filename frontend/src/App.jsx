@@ -12,7 +12,6 @@ import CategorySelect  from './pages/CategorySelect'
 import RoleSelect      from './pages/RoleSelect'
 import UserDetailsForm from './pages/UserDetailsForm'
 import RoadmapPage     from './pages/RoadmapPage'
-
 // Components
 import ScrollToTop from './components/ScrollToTop'
 
