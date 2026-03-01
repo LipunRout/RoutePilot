@@ -2,11 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import {
-  getRoadmap,
-  updateProgress,
-  downloadRoadmapPDF,
-} from "../services/api";
+import { getRoadmap, updateProgress, downloadRoadmapPDF } from "../services/api";
 import Certificate from "../components/Certificate";
 import { useAuth } from "../context/AuthContext";
 
@@ -32,18 +28,17 @@ export default function RoadmapPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const progressRef = useRef(null);
-  const { user } = useAuth(); // ← add this
-  const [showCert, setShowCert] = useState(false); // ← add this
+  const { user } = useAuth();
+  const [showCert, setShowCert] = useState(false);
 
   const [roadmap, setRoadmap] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openPhase, setOpen] = useState(0);
   const [completed, setComp] = useState({});
-  const [emailSent, setEmail] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);  // ← replaces emailSent
   const [copyDone, setCopy] = useState(false);
   const [activeTab, setTab] = useState("roadmap");
-  const [pdfLoading, setPdfLoading] = useState(false);
 
   const userName =
     user?.user_metadata?.first_name ||
@@ -58,22 +53,10 @@ export default function RoadmapPage() {
       setLoading(false);
       return;
     }
-    const handleDownload = async () => {
-      setPdfLoading(true);
-      try {
-        await downloadRoadmapPDF(id, roadmap.role);
-      } catch (e) {
-        console.error("PDF download failed:", e);
-        alert("Download failed. Please try again.");
-      } finally {
-        setPdfLoading(false);
-      }
-    };
 
     getRoadmap(id)
       .then(({ data }) => {
         const rm = data.roadmap;
-        // Normalize roadmap_data — attach phase colors if missing
         const rd = rm.roadmap_data || {};
         if (rd.phases) {
           rd.phases = rd.phases.map((p, i) => ({
@@ -83,7 +66,6 @@ export default function RoadmapPage() {
           }));
         }
         setRoadmap({ ...rm, roadmap_data: rd });
-        // Restore saved progress
         if (rm.completed_phases > 0 && rd.phases) {
           const saved = {};
           rd.phases.slice(0, rm.completed_phases).forEach((p) => {
@@ -91,7 +73,6 @@ export default function RoadmapPage() {
           });
           setComp(saved);
         }
-        // Open first incomplete phase
         if (rd.phases) {
           const firstIncomplete = rd.phases.find(
             (p) => !rm.completed_phases || p.id > rm.completed_phases
@@ -129,19 +110,16 @@ export default function RoadmapPage() {
     ? Math.round((completedCount / totalPhases) * 100)
     : 0;
 
-  const handleEmail = async () => {
-    console.log("Email clicked. ID:", id);
-
+  /* ── Download PDF ── */
+  const handleDownload = async () => {
+    setPdfLoading(true);
     try {
-      const res = await emailRoadmapPDF(id);
-      console.log("Email success:", res);
-
-      setEmail(true);
-      setTimeout(() => setEmail(false), 3000);
+      await downloadRoadmapPDF(id, roadmap.role);
     } catch (e) {
-      console.error("Email failed:", e.response?.data || e.message);
-
-      alert("Email failed. Check console.");
+      console.error("PDF download failed:", e);
+      alert("Download failed. Please try again.");
+    } finally {
+      setPdfLoading(false);
     }
   };
 
