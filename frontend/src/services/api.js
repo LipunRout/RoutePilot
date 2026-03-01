@@ -20,6 +20,20 @@ api.interceptors.request.use(async (config) => {
   }
   return config
 })
+export const downloadRoadmapPDF = async (roadmapId, role) => {
+  const res = await api.get(`/api/download-pdf/${roadmapId}`, {
+    responseType: 'blob',   // ← important: receive binary
+  })
+  // Trigger browser download
+  const url      = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
+  const link     = document.createElement('a')
+  link.href      = url
+  link.download  = `${(role || 'Roadmap').replace(/\s+/g, '-')}-RoutePilot.pdf`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
 
 /* ── Roadmap ── */
 export const generateRoadmap = (formData) => api.post('/api/generate-roadmap', formData)

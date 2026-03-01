@@ -2,9 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { getRoadmap, updateProgress, emailRoadmapPDF } from "../services/api";
-import Certificate from '../components/Certificate'
-import { useAuth } from '../context/AuthContext'
+import {
+  getRoadmap,
+  updateProgress,
+  downloadRoadmapPDF,
+} from "../services/api";
+import Certificate from "../components/Certificate";
+import { useAuth } from "../context/AuthContext";
 
 const DIFF_COLOR = {
   Beginner: "#00c97a",
@@ -14,121 +18,174 @@ const DIFF_COLOR = {
   Advanced: "#ef4444",
 };
 
-const PHASE_COLORS = ["#00c97a", "#0ea5e9", "#a855f7", "#f59e0b", "#ef4444", "#06b6d4", "#84cc16"];
+const PHASE_COLORS = [
+  "#00c97a",
+  "#0ea5e9",
+  "#a855f7",
+  "#f59e0b",
+  "#ef4444",
+  "#06b6d4",
+  "#84cc16",
+];
 
-export default function RoadmapPage() 
-{
-  const { id }       = useParams()
-  const navigate     = useNavigate()
-  const progressRef  = useRef(null)
-  const { user } = useAuth()           // ← add this
-  const [showCert, setShowCert] = useState(false)  // ← add this
+export default function RoadmapPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const progressRef = useRef(null);
+  const { user } = useAuth(); // ← add this
+  const [showCert, setShowCert] = useState(false); // ← add this
 
-  const [roadmap,   setRoadmap]   = useState(null)
-  const [loading,   setLoading]   = useState(true)
-  const [error,     setError]     = useState(null)
-  const [openPhase, setOpen]      = useState(0)
-  const [completed, setComp]      = useState({})
-  const [emailSent, setEmail]     = useState(false)
-  const [copyDone,  setCopy]      = useState(false)
-  const [activeTab, setTab]       = useState("roadmap")
+  const [roadmap, setRoadmap] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [openPhase, setOpen] = useState(0);
+  const [completed, setComp] = useState({});
+  const [emailSent, setEmail] = useState(false);
+  const [copyDone, setCopy] = useState(false);
+  const [activeTab, setTab] = useState("roadmap");
+  const [pdfLoading, setPdfLoading] = useState(false);
 
-  const userName = user?.user_metadata?.first_name
-  || user?.user_metadata?.full_name
-  || user?.email?.split('@')[0]
-  || 'Learner'
+  const userName =
+    user?.user_metadata?.first_name ||
+    user?.user_metadata?.full_name ||
+    user?.email?.split("@")[0] ||
+    "Learner";
 
   /* ── Fetch real roadmap from backend ── */
   useEffect(() => {
-    if (!id) { setError("No roadmap ID provided"); setLoading(false); return }
+    if (!id) {
+      setError("No roadmap ID provided");
+      setLoading(false);
+      return;
+    }
+    const handleDownload = async () => {
+      setPdfLoading(true);
+      try {
+        await downloadRoadmapPDF(id, roadmap.role);
+      } catch (e) {
+        console.error("PDF download failed:", e);
+        alert("Download failed. Please try again.");
+      } finally {
+        setPdfLoading(false);
+      }
+    };
 
     getRoadmap(id)
       .then(({ data }) => {
-        const rm = data.roadmap
+        const rm = data.roadmap;
         // Normalize roadmap_data — attach phase colors if missing
-        const rd = rm.roadmap_data || {}
+        const rd = rm.roadmap_data || {};
         if (rd.phases) {
           rd.phases = rd.phases.map((p, i) => ({
             ...p,
-            id:    p.id    || i + 1,
+            id: p.id || i + 1,
             color: p.color || PHASE_COLORS[i % PHASE_COLORS.length],
-          }))
+          }));
         }
-        setRoadmap({ ...rm, roadmap_data: rd })
+        setRoadmap({ ...rm, roadmap_data: rd });
         // Restore saved progress
         if (rm.completed_phases > 0 && rd.phases) {
-          const saved = {}
-          rd.phases.slice(0, rm.completed_phases).forEach(p => { saved[p.id] = true })
-          setComp(saved)
+          const saved = {};
+          rd.phases.slice(0, rm.completed_phases).forEach((p) => {
+            saved[p.id] = true;
+          });
+          setComp(saved);
         }
         // Open first incomplete phase
         if (rd.phases) {
-          const firstIncomplete = rd.phases.find(p => !rm.completed_phases || p.id > rm.completed_phases)
-          setOpen(firstIncomplete?.id || rd.phases[0]?.id || 1)
+          const firstIncomplete = rd.phases.find(
+            (p) => !rm.completed_phases || p.id > rm.completed_phases
+          );
+          setOpen(firstIncomplete?.id || rd.phases[0]?.id || 1);
         }
       })
-      .catch(err => {
-        console.error(err)
-        setError("Failed to load roadmap. Please try again.")
+      .catch((err) => {
+        console.error(err);
+        setError("Failed to load roadmap. Please try again.");
       })
-      .finally(() => setLoading(false))
-  }, [id])
+      .finally(() => setLoading(false));
+  }, [id]);
 
-  const rd = roadmap?.roadmap_data || {}
-  const phases = rd.phases || []
+  const rd = roadmap?.roadmap_data || {};
+  const phases = rd.phases || [];
 
-  const togglePhase = (phaseId) => setOpen(p => p === phaseId ? null : phaseId)
+  const togglePhase = (phaseId) =>
+    setOpen((p) => (p === phaseId ? null : phaseId));
 
   const toggleComplete = async (phaseId) => {
-    const next = { ...completed, [phaseId]: !completed[phaseId] }
-    setComp(next)
-    const completedCount = Object.values(next).filter(Boolean).length
+    const next = { ...completed, [phaseId]: !completed[phaseId] };
+    setComp(next);
+    const completedCount = Object.values(next).filter(Boolean).length;
     try {
-      await updateProgress(id, completedCount, phases.length)
+      await updateProgress(id, completedCount, phases.length);
     } catch (e) {
-      console.error("Progress save failed:", e)
+      console.error("Progress save failed:", e);
     }
-  }
+  };
 
-  const completedCount = Object.values(completed).filter(Boolean).length
-  const totalPhases    = phases.length || rd.totalPhases || 0
-  const pct            = totalPhases ? Math.round((completedCount / totalPhases) * 100) : 0
+  const completedCount = Object.values(completed).filter(Boolean).length;
+  const totalPhases = phases.length || rd.totalPhases || 0;
+  const pct = totalPhases
+    ? Math.round((completedCount / totalPhases) * 100)
+    : 0;
 
   const handleEmail = async () => {
-    console.log("Email clicked. ID:", id)
-  
+    console.log("Email clicked. ID:", id);
+
     try {
-      const res = await emailRoadmapPDF(id)
-      console.log("Email success:", res)
-  
-      setEmail(true)
-      setTimeout(() => setEmail(false), 3000)
-  
+      const res = await emailRoadmapPDF(id);
+      console.log("Email success:", res);
+
+      setEmail(true);
+      setTimeout(() => setEmail(false), 3000);
     } catch (e) {
-      console.error("Email failed:", e.response?.data || e.message)
-  
-      alert("Email failed. Check console.")
+      console.error("Email failed:", e.response?.data || e.message);
+
+      alert("Email failed. Check console.");
     }
-  }
+  };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(window.location.href)
-    setCopy(true)
-    setTimeout(() => setCopy(false), 2000)
-  }
+    navigator.clipboard.writeText(window.location.href);
+    setCopy(true);
+    setTimeout(() => setCopy(false), 2000);
+  };
 
   /* ── States ── */
-  if (loading) return <GeneratingScreen />
-  if (error)   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16, background: 'var(--bg)', fontFamily: "'Inter',sans-serif" }}>
-      <div style={{ fontSize: '2rem' }}>⚠️</div>
-      <div style={{ color: 'var(--text-1)', fontWeight: 600 }}>{error}</div>
-      <button onClick={() => navigate('/dashboard')} style={{ padding: '10px 24px', background: 'var(--primary)', border: 'none', borderRadius: 9, fontWeight: 600, cursor: 'pointer', color: '#000' }}>
-        ← Back to Dashboard
-      </button>
-    </div>
-  )
-  if (!roadmap) return null
+  if (loading) return <GeneratingScreen />;
+  if (error)
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          gap: 16,
+          background: "var(--bg)",
+          fontFamily: "'Inter',sans-serif",
+        }}
+      >
+        <div style={{ fontSize: "2rem" }}>⚠️</div>
+        <div style={{ color: "var(--text-1)", fontWeight: 600 }}>{error}</div>
+        <button
+          onClick={() => navigate("/dashboard")}
+          style={{
+            padding: "10px 24px",
+            background: "var(--primary)",
+            border: "none",
+            borderRadius: 9,
+            fontWeight: 600,
+            cursor: "pointer",
+            color: "#000",
+          }}
+        >
+          ← Back to Dashboard
+        </button>
+      </div>
+    );
+  if (!roadmap) return null;
 
   return (
     <>
@@ -313,7 +370,6 @@ export default function RoadmapPage()
           <div className="rm-hero-grid" />
           <div className="rm-hero-radial" />
           <div className="rm-hero-inner">
-
             <nav className="rm-bc">
               <Link to="/">Home</Link>
               <span className="rm-bc-sep">›</span>
@@ -334,67 +390,113 @@ export default function RoadmapPage()
                 </div>
                 <p className="rm-overview">{rd.overview}</p>
                 <div className="rm-meta">
-                  <span className="rm-meta-pill">📅 {rd.timeline || roadmap.form_data?.timeline + ' months' || '—'}</span>
+                  <span className="rm-meta-pill">
+                    📅{" "}
+                    {rd.timeline ||
+                      roadmap.form_data?.timeline + " months" ||
+                      "—"}
+                  </span>
                   <span className="rm-meta-pill">◎ {totalPhases} phases</span>
-                  <span className="rm-meta-pill">✦ {phases.reduce((a, p) => a + (p.resources?.length || 0), 0)} resources</span>
-                  <span className="rm-meta-pill">🏗️ {totalPhases} projects</span>
+                  <span className="rm-meta-pill">
+                    ✦{" "}
+                    {phases.reduce((a, p) => a + (p.resources?.length || 0), 0)}{" "}
+                    resources
+                  </span>
+                  <span className="rm-meta-pill">
+                    🏗️ {totalPhases} projects
+                  </span>
                 </div>
               </div>
 
               <div className="rm-hero-actions">
-                <button className="rm-action-btn rm-action-primary" onClick={handleEmail}>
-                  {emailSent ? "✓ Sent!" : "✉ Email PDF"}
+                <button
+                  className="rm-action-btn rm-action-primary"
+                  onClick={handleDownload}
+                  disabled={pdfLoading}
+                >
+                  {pdfLoading ? "⏳ Generating..." : "⬇ Download PDF"}
                 </button>
-                <button className="rm-action-btn rm-action-secondary" onClick={handleCopy}>
+                <button
+                  className="rm-action-btn rm-action-secondary"
+                  onClick={handleCopy}
+                >
                   {copyDone ? "✓ Copied!" : "⎘ Copy link"}
                 </button>
-                <Link to="/category" className="rm-action-btn rm-action-secondary">
+                <Link
+                  to="/category"
+                  className="rm-action-btn rm-action-secondary"
+                >
                   ↺ New roadmap
                 </Link>
               </div>
             </div>
 
             <div className="rm-progress-strip" ref={progressRef}>
-  <span className="rm-progress-label">{completedCount}/{totalPhases} phases complete</span>
-  <div className="rm-progress-bar-wrap">
-    <div className="rm-progress-bar-fill" style={{ width: `${pct}%` }} />
-  </div>
-  <span className="rm-progress-pct">{pct}%</span>
-</div>
+              <span className="rm-progress-label">
+                {completedCount}/{totalPhases} phases complete
+              </span>
+              <div className="rm-progress-bar-wrap">
+                <div
+                  className="rm-progress-bar-fill"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <span className="rm-progress-pct">{pct}%</span>
+            </div>
 
-{/* Certificate button — shows when all phases done */}
-{completedCount > 0 && completedCount === totalPhases && (
-  <div style={{ display:'flex', justifyContent:'center', padding:'16px 0' }}>
-    <button
-      onClick={() => setShowCert(true)}
-      style={{
-        display: 'flex', alignItems: 'center', gap: 8,
-        padding: '12px 28px', borderRadius: 10, border: 'none',
-        background: 'linear-gradient(135deg, #00c97a, #0ea5e9)',
-        color: '#000', fontFamily:"'Inter',sans-serif",
-        fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer',
-        boxShadow: '0 0 24px rgba(0,201,122,0.3)',
-      }}
-    >
-      🏆 Claim Your Certificate
-    </button>
-  </div>
-)}
+            {/* Certificate button — shows when all phases done */}
+            {completedCount > 0 && completedCount === totalPhases && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "16px 0",
+                }}
+              >
+                <button
+                  onClick={() => setShowCert(true)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "12px 28px",
+                    borderRadius: 10,
+                    border: "none",
+                    background: "linear-gradient(135deg, #00c97a, #0ea5e9)",
+                    color: "#000",
+                    fontFamily: "'Inter',sans-serif",
+                    fontSize: "0.9rem",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    boxShadow: "0 0 24px rgba(0,201,122,0.3)",
+                  }}
+                >
+                  🏆 Claim Your Certificate
+                </button>
+              </div>
+            )}
 
-{/* Certificate modal */}
-{showCert && (
-  <Certificate
-    userName={userName}
-    role={rd.role}
-    completedPhases={completedCount}
-    totalPhases={totalPhases}
-    onClose={() => setShowCert(false)}
-  />
-)}
+            {/* Certificate modal */}
+            {showCert && (
+              <Certificate
+                userName={userName}
+                role={rd.role}
+                completedPhases={completedCount}
+                totalPhases={totalPhases}
+                onClose={() => setShowCert(false)}
+              />
+            )}
 
             <div className="rm-tabs">
-              {[{ id: "roadmap", label: "◈ Roadmap" }, { id: "overview", label: "◎ Overview" }].map(t => (
-                <button key={t.id} className={`rm-tab ${activeTab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
+              {[
+                { id: "roadmap", label: "◈ Roadmap" },
+                { id: "overview", label: "◎ Overview" },
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  className={`rm-tab ${activeTab === t.id ? "active" : ""}`}
+                  onClick={() => setTab(t.id)}
+                >
                   {t.label}
                 </button>
               ))}
@@ -403,42 +505,95 @@ export default function RoadmapPage()
         </div>
 
         <div className="rm-body">
-
           {/* ── ROADMAP TAB ── */}
           {activeTab === "roadmap" && (
             <div className="rm-phases">
               {phases.map((phase, i) => {
-                const isOpen = openPhase === phase.id
-                const isDone = completed[phase.id]
-                const color  = phase.color || PHASE_COLORS[i % PHASE_COLORS.length]
+                const isOpen = openPhase === phase.id;
+                const isDone = completed[phase.id];
+                const color =
+                  phase.color || PHASE_COLORS[i % PHASE_COLORS.length];
 
                 return (
                   <div
                     key={phase.id}
                     className={`rm-phase ${isOpen ? "open" : ""}`}
-                    style={{ borderColor: isOpen ? color + "55" : undefined, animationDelay: `${i * 0.07}s` }}
+                    style={{
+                      borderColor: isOpen ? color + "55" : undefined,
+                      animationDelay: `${i * 0.07}s`,
+                    }}
                   >
-                    <div className="rm-phase-header" onClick={() => togglePhase(phase.id)}>
-                      <div className="rm-phase-num" style={{ background: isDone ? color : isOpen ? color + "22" : "var(--bg-2)", borderColor: isOpen || isDone ? color : "var(--border)", color: isDone ? "#000" : isOpen ? color : "var(--text-3)" }}>
+                    <div
+                      className="rm-phase-header"
+                      onClick={() => togglePhase(phase.id)}
+                    >
+                      <div
+                        className="rm-phase-num"
+                        style={{
+                          background: isDone
+                            ? color
+                            : isOpen
+                            ? color + "22"
+                            : "var(--bg-2)",
+                          borderColor:
+                            isOpen || isDone ? color : "var(--border)",
+                          color: isDone
+                            ? "#000"
+                            : isOpen
+                            ? color
+                            : "var(--text-3)",
+                        }}
+                      >
                         {isDone ? "✓" : `0${phase.id}`}
                       </div>
                       <div className="rm-phase-info">
-                        <div className="rm-phase-title" style={{ color: isOpen ? color : undefined }}>{phase.title}</div>
-                        <div className="rm-phase-subtitle" style={{ color: isOpen ? color + "aa" : undefined }}>{phase.subtitle}</div>
+                        <div
+                          className="rm-phase-title"
+                          style={{ color: isOpen ? color : undefined }}
+                        >
+                          {phase.title}
+                        </div>
+                        <div
+                          className="rm-phase-subtitle"
+                          style={{ color: isOpen ? color + "aa" : undefined }}
+                        >
+                          {phase.subtitle}
+                        </div>
                       </div>
                       <div className="rm-phase-meta">
-                        <span className="rm-phase-duration">⏱ {phase.duration}</span>
-                        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-  <span style={{ fontFamily:"'Inter',sans-serif", fontSize:"0.7rem", color: isDone ? "var(--primary)" : "var(--text-3)", whiteSpace:'nowrap' }}>
-    {isDone ? "Completed" : "Mark done"}
-  </span>
-  <div
-    className={`rm-phase-check ${isDone ? "done" : ""}`}
-    onClick={e => { e.stopPropagation(); toggleComplete(phase.id) }}
-    title={isDone ? "Mark incomplete" : "Mark as complete"}
-  />
-</div>
-
+                        <span className="rm-phase-duration">
+                          ⏱ {phase.duration}
+                        </span>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontFamily: "'Inter',sans-serif",
+                              fontSize: "0.7rem",
+                              color: isDone
+                                ? "var(--primary)"
+                                : "var(--text-3)",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {isDone ? "Completed" : "Mark done"}
+                          </span>
+                          <div
+                            className={`rm-phase-check ${isDone ? "done" : ""}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleComplete(phase.id);
+                            }}
+                            title={
+                              isDone ? "Mark incomplete" : "Mark as complete"
+                            }
+                          />
+                        </div>
                       </div>
                       <div className="rm-phase-chevron">›</div>
                     </div>
@@ -447,10 +602,22 @@ export default function RoadmapPage()
                       <div className="rm-phase-content">
                         {phase.topics?.length > 0 && (
                           <>
-                            <div className="rm-topics-label">Topics covered</div>
+                            <div className="rm-topics-label">
+                              Topics covered
+                            </div>
                             <div className="rm-topics">
-                              {phase.topics.map(t => (
-                                <span key={t} className="rm-topic" style={{ borderColor: color + "44", color, background: color + "11" }}>{t}</span>
+                              {phase.topics.map((t) => (
+                                <span
+                                  key={t}
+                                  className="rm-topic"
+                                  style={{
+                                    borderColor: color + "44",
+                                    color,
+                                    background: color + "11",
+                                  }}
+                                >
+                                  {t}
+                                </span>
                               ))}
                             </div>
                           </>
@@ -459,16 +626,28 @@ export default function RoadmapPage()
                         {phase.outcome && (
                           <div className="rm-outcome">
                             <span className="rm-outcome-icon">🎯</span>
-                            <span className="rm-outcome-text"><strong>Phase outcome:</strong> {phase.outcome}</span>
+                            <span className="rm-outcome-text">
+                              <strong>Phase outcome:</strong> {phase.outcome}
+                            </span>
                           </div>
                         )}
 
                         {phase.resources?.length > 0 && (
                           <div className="rm-resources">
                             {phase.resources.map((r, ri) => (
-                              <a key={ri} href={r.url !== "#" ? r.url : undefined} className="rm-resource" target="_blank" rel="noreferrer">
-                                <div className={`rm-resource-type ${r.type}`}>{r.type === "video" ? "▶" : "📄"}</div>
-                                <span className="rm-resource-label">{r.label}</span>
+                              <a
+                                key={ri}
+                                href={r.url !== "#" ? r.url : undefined}
+                                className="rm-resource"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                <div className={`rm-resource-type ${r.type}`}>
+                                  {r.type === "video" ? "▶" : "📄"}
+                                </div>
+                                <span className="rm-resource-label">
+                                  {r.label}
+                                </span>
                               </a>
                             ))}
                           </div>
@@ -478,15 +657,19 @@ export default function RoadmapPage()
                           <div className="rm-project">
                             <span className="rm-project-icon">🏗️</span>
                             <div>
-                              <div className="rm-project-label">Phase project</div>
-                              <div className="rm-project-text">{phase.project}</div>
+                              <div className="rm-project-label">
+                                Phase project
+                              </div>
+                              <div className="rm-project-text">
+                                {phase.project}
+                              </div>
                             </div>
                           </div>
                         )}
                       </div>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           )}
@@ -499,9 +682,21 @@ export default function RoadmapPage()
                 <div className="rm-stats-grid">
                   {[
                     { n: totalPhases, l: "Phases" },
-                    { n: rd.timeline || `${roadmap.form_data?.timeline}mo` || "—", l: "Timeline" },
-                    { n: `${phases.reduce((a, p) => a + (p.resources?.length || 0), 0)}+`, l: "Resources" },
-                  ].map(s => (
+                    {
+                      n:
+                        rd.timeline ||
+                        `${roadmap.form_data?.timeline}mo` ||
+                        "—",
+                      l: "Timeline",
+                    },
+                    {
+                      n: `${phases.reduce(
+                        (a, p) => a + (p.resources?.length || 0),
+                        0
+                      )}+`,
+                      l: "Resources",
+                    },
+                  ].map((s) => (
                     <div className="rm-stat-cell" key={s.l}>
                       <div className="rm-stat-num">{s.n}</div>
                       <div className="rm-stat-label">{s.l}</div>
@@ -514,10 +709,20 @@ export default function RoadmapPage()
                 <div className="rm-ov-card-title">Phase timeline</div>
                 <div className="rm-timeline-list">
                   {phases.map((phase, i) => {
-                    const color = phase.color || PHASE_COLORS[i % PHASE_COLORS.length]
+                    const color =
+                      phase.color || PHASE_COLORS[i % PHASE_COLORS.length];
                     return (
                       <div key={phase.id} className="rm-timeline-item">
-                        <div className="rm-tl-dot" style={{ background: completed[phase.id] ? color : color + "22", borderColor: color, color: completed[phase.id] ? "#000" : color }}>
+                        <div
+                          className="rm-tl-dot"
+                          style={{
+                            background: completed[phase.id]
+                              ? color
+                              : color + "22",
+                            borderColor: color,
+                            color: completed[phase.id] ? "#000" : color,
+                          }}
+                        >
                           {completed[phase.id] ? "✓" : i + 1}
                         </div>
                         <div className="rm-tl-info">
@@ -526,16 +731,61 @@ export default function RoadmapPage()
                         </div>
                         <div className="rm-tl-duration">{phase.duration}</div>
                       </div>
-                    )
+                    );
                   })}
                 </div>
               </div>
 
-              <div className="rm-ov-card" style={{ animationDelay: "0.16s", textAlign: "center", padding: "36px", position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", top: "-1px", left: "20%", right: "20%", height: "1px", background: "linear-gradient(90deg, transparent, var(--primary), transparent)" }} />
-                <div style={{ fontFamily: "'Inter',sans-serif", fontSize: "1rem", fontWeight: 700, color: "var(--text-1)", letterSpacing: "-0.03em", marginBottom: 6 }}>Want expert guidance?</div>
-                <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.1rem", fontStyle: "italic", color: "var(--text-2)", marginBottom: 20 }}>Book a 1:1 session with a career mentor</div>
-                <button className="rm-action-btn rm-action-primary" style={{ margin: "0 auto" }}>Book a call →</button>
+              <div
+                className="rm-ov-card"
+                style={{
+                  animationDelay: "0.16s",
+                  textAlign: "center",
+                  padding: "36px",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "-1px",
+                    left: "20%",
+                    right: "20%",
+                    height: "1px",
+                    background:
+                      "linear-gradient(90deg, transparent, var(--primary), transparent)",
+                  }}
+                />
+                <div
+                  style={{
+                    fontFamily: "'Inter',sans-serif",
+                    fontSize: "1rem",
+                    fontWeight: 700,
+                    color: "var(--text-1)",
+                    letterSpacing: "-0.03em",
+                    marginBottom: 6,
+                  }}
+                >
+                  Want expert guidance?
+                </div>
+                <div
+                  style={{
+                    fontFamily: "'Cormorant Garamond',serif",
+                    fontSize: "1.1rem",
+                    fontStyle: "italic",
+                    color: "var(--text-2)",
+                    marginBottom: 20,
+                  }}
+                >
+                  Book a 1:1 session with a career mentor
+                </div>
+                <button
+                  className="rm-action-btn rm-action-primary"
+                  style={{ margin: "0 auto" }}
+                >
+                  Book a call →
+                </button>
               </div>
             </div>
           )}
@@ -543,23 +793,36 @@ export default function RoadmapPage()
         <Footer />
       </div>
 
-      {emailSent && <div className="rm-toast">✉ Roadmap PDF sent to your email!</div>}
-      {copyDone  && <div className="rm-toast">✓ Link copied to clipboard!</div>}
+      {emailSent && (
+        <div className="rm-toast">✉ Roadmap PDF sent to your email!</div>
+      )}
+      {copyDone && <div className="rm-toast">✓ Link copied to clipboard!</div>}
     </>
-  )
+  );
 }
 
 /* ── GENERATING SCREEN ── */
 function GeneratingScreen() {
-  const [dots, setDots]       = useState(0)
-  const [stepIdx, setStepIdx] = useState(0)
-  const steps = ["Analyzing your profile...", "Mapping career phases...", "Curating resources...", "Building your roadmap..."]
+  const [dots, setDots] = useState(0);
+  const [stepIdx, setStepIdx] = useState(0);
+  const steps = [
+    "Analyzing your profile...",
+    "Mapping career phases...",
+    "Curating resources...",
+    "Building your roadmap...",
+  ];
 
   useEffect(() => {
-    const t1 = setInterval(() => setDots(p => (p + 1) % 4), 400)
-    const t2 = setInterval(() => setStepIdx(p => Math.min(p + 1, steps.length - 1)), 500)
-    return () => { clearInterval(t1); clearInterval(t2) }
-  }, [])
+    const t1 = setInterval(() => setDots((p) => (p + 1) % 4), 400);
+    const t2 = setInterval(
+      () => setStepIdx((p) => Math.min(p + 1, steps.length - 1)),
+      500
+    );
+    return () => {
+      clearInterval(t1);
+      clearInterval(t2);
+    };
+  }, []);
 
   return (
     <>
@@ -593,15 +856,27 @@ function GeneratingScreen() {
           <div className="gen-ring-wrap">
             <div className="gen-ring" />
             <div className="gen-ring-inner" />
-            <div className="gen-ring-logo"><img src="/favicon.png" alt="RoutePilot" /></div>
+            <div className="gen-ring-logo">
+              <img src="/favicon.png" alt="RoutePilot" />
+            </div>
           </div>
           <span className="gen-title-line1">Building your</span>
           <span className="gen-title-line2">personalized roadmap</span>
-          <div className="gen-step">{steps[stepIdx]}{"".padEnd(dots, ".")}</div>
+          <div className="gen-step">
+            {steps[stepIdx]}
+            {"".padEnd(dots, ".")}
+          </div>
           <div className="gen-steps-track">
             {steps.map((s, i) => (
-              <div key={i} className={`gen-step-item ${i < stepIdx ? "done" : i === stepIdx ? "active" : ""}`}>
-                <div className="gen-step-icon">{i < stepIdx ? "✓" : i === stepIdx ? "◉" : ""}</div>
+              <div
+                key={i}
+                className={`gen-step-item ${
+                  i < stepIdx ? "done" : i === stepIdx ? "active" : ""
+                }`}
+              >
+                <div className="gen-step-icon">
+                  {i < stepIdx ? "✓" : i === stepIdx ? "◉" : ""}
+                </div>
                 {s}
               </div>
             ))}
@@ -609,5 +884,5 @@ function GeneratingScreen() {
         </div>
       </div>
     </>
-  )
+  );
 }
