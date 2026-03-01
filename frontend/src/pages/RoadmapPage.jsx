@@ -201,6 +201,7 @@ export default function RoadmapPage() {
         .rm-action-btn { display: inline-flex; align-items: center; gap: 7px; padding: 0 16px; height: 38px; border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 0.825rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease; white-space: nowrap; text-decoration: none; }
         .rm-action-primary { background: var(--primary); border: none; color: #000; }
         .rm-action-primary:hover { background: #00e089; box-shadow: 0 0 18px rgba(0,201,122,0.3); transform: translateY(-1px); }
+        .rm-action-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .rm-action-secondary { background: var(--bg-2); border: 1px solid var(--border); color: var(--text-2); }
         .rm-action-secondary:hover { background: var(--bg-3); border-color: var(--border-hover); color: var(--text-1); }
 
@@ -229,54 +230,49 @@ export default function RoadmapPage() {
         .rm-phase-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .rm-phase-duration { font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 500; color: var(--text-3); padding: 3px 9px; border: 1px solid var(--border); border-radius: 20px; background: var(--bg-2); white-space: nowrap; }
         .rm-phase-check {
-  width: 32px; height: 32px; border-radius: 50%;
-  border: 2px dashed var(--border);
-  background: var(--bg-2);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.8rem; font-weight: 700;
-  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-  flex-shrink: 0;
-  position: relative;
-  color: var(--text-3);
-}
-
-.rm-phase-check::before {
-  content: '✓';
-  opacity: 0.3;
-  font-size: 0.75rem;
-  color: var(--text-3);
-}
-
-.rm-phase-check:hover {
-  border-style: solid;
-  border-color: var(--primary);
-  background: rgba(0,201,122,0.08);
-  color: var(--primary);
-  transform: scale(1.1);
-  box-shadow: 0 0 12px rgba(0,201,122,0.2);
-}
-
-.rm-phase-check:hover::before {
-  opacity: 1;
-  color: var(--primary);
-}
-
-.rm-phase-check.done {
-  background: var(--primary);
-  border: 2px solid var(--primary);
-  border-style: solid;
-  color: #000;
-  box-shadow: 0 0 16px rgba(0,201,122,0.4);
-  transform: scale(1.05);
-}
-
-.rm-phase-check.done::before {
-  content: '✓';
-  opacity: 1;
-  color: #000;
-  font-weight: 800;
-}
+          width: 32px; height: 32px; border-radius: 50%;
+          border: 2px dashed var(--border);
+          background: var(--bg-2);
+          cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 0.8rem; font-weight: 700;
+          transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+          flex-shrink: 0;
+          position: relative;
+          color: var(--text-3);
+        }
+        .rm-phase-check::before {
+          content: '✓';
+          opacity: 0.3;
+          font-size: 0.75rem;
+          color: var(--text-3);
+        }
+        .rm-phase-check:hover {
+          border-style: solid;
+          border-color: var(--primary);
+          background: rgba(0,201,122,0.08);
+          color: var(--primary);
+          transform: scale(1.1);
+          box-shadow: 0 0 12px rgba(0,201,122,0.2);
+        }
+        .rm-phase-check:hover::before {
+          opacity: 1;
+          color: var(--primary);
+        }
+        .rm-phase-check.done {
+          background: var(--primary);
+          border: 2px solid var(--primary);
+          border-style: solid;
+          color: #000;
+          box-shadow: 0 0 16px rgba(0,201,122,0.4);
+          transform: scale(1.05);
+        }
+        .rm-phase-check.done::before {
+          content: '✓';
+          opacity: 1;
+          color: #000;
+          font-weight: 800;
+        }
         .rm-phase-chevron { font-size: 0.78rem; color: var(--text-3); transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); flex-shrink: 0; }
         .rm-phase.open .rm-phase-chevron { transform: rotate(90deg); }
 
@@ -387,6 +383,7 @@ export default function RoadmapPage() {
               </div>
 
               <div className="rm-hero-actions">
+                {/* ── DOWNLOAD PDF BUTTON ── */}
                 <button
                   className="rm-action-btn rm-action-primary"
                   onClick={handleDownload}
@@ -422,30 +419,17 @@ export default function RoadmapPage() {
               <span className="rm-progress-pct">{pct}%</span>
             </div>
 
-            {/* Certificate button — shows when all phases done */}
+            {/* Certificate button */}
             {completedCount > 0 && completedCount === totalPhases && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  padding: "16px 0",
-                }}
-              >
+              <div style={{ display: "flex", justifyContent: "center", padding: "16px 0" }}>
                 <button
                   onClick={() => setShowCert(true)}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "12px 28px",
-                    borderRadius: 10,
-                    border: "none",
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "12px 28px", borderRadius: 10, border: "none",
                     background: "linear-gradient(135deg, #00c97a, #0ea5e9)",
-                    color: "#000",
-                    fontFamily: "'Inter',sans-serif",
-                    fontSize: "0.9rem",
-                    fontWeight: 700,
-                    cursor: "pointer",
+                    color: "#000", fontFamily: "'Inter',sans-serif",
+                    fontSize: "0.9rem", fontWeight: 700, cursor: "pointer",
                     boxShadow: "0 0 24px rgba(0,201,122,0.3)",
                   }}
                 >
@@ -454,7 +438,6 @@ export default function RoadmapPage() {
               </div>
             )}
 
-            {/* Certificate modal */}
             {showCert && (
               <Certificate
                 userName={userName}
@@ -483,93 +466,48 @@ export default function RoadmapPage() {
         </div>
 
         <div className="rm-body">
-          {/* ── ROADMAP TAB ── */}
           {activeTab === "roadmap" && (
             <div className="rm-phases">
               {phases.map((phase, i) => {
                 const isOpen = openPhase === phase.id;
                 const isDone = completed[phase.id];
-                const color =
-                  phase.color || PHASE_COLORS[i % PHASE_COLORS.length];
+                const color = phase.color || PHASE_COLORS[i % PHASE_COLORS.length];
 
                 return (
                   <div
                     key={phase.id}
                     className={`rm-phase ${isOpen ? "open" : ""}`}
-                    style={{
-                      borderColor: isOpen ? color + "55" : undefined,
-                      animationDelay: `${i * 0.07}s`,
-                    }}
+                    style={{ borderColor: isOpen ? color + "55" : undefined, animationDelay: `${i * 0.07}s` }}
                   >
-                    <div
-                      className="rm-phase-header"
-                      onClick={() => togglePhase(phase.id)}
-                    >
+                    <div className="rm-phase-header" onClick={() => togglePhase(phase.id)}>
                       <div
                         className="rm-phase-num"
                         style={{
-                          background: isDone
-                            ? color
-                            : isOpen
-                            ? color + "22"
-                            : "var(--bg-2)",
-                          borderColor:
-                            isOpen || isDone ? color : "var(--border)",
-                          color: isDone
-                            ? "#000"
-                            : isOpen
-                            ? color
-                            : "var(--text-3)",
+                          background: isDone ? color : isOpen ? color + "22" : "var(--bg-2)",
+                          borderColor: isOpen || isDone ? color : "var(--border)",
+                          color: isDone ? "#000" : isOpen ? color : "var(--text-3)",
                         }}
                       >
                         {isDone ? "✓" : `0${phase.id}`}
                       </div>
                       <div className="rm-phase-info">
-                        <div
-                          className="rm-phase-title"
-                          style={{ color: isOpen ? color : undefined }}
-                        >
+                        <div className="rm-phase-title" style={{ color: isOpen ? color : undefined }}>
                           {phase.title}
                         </div>
-                        <div
-                          className="rm-phase-subtitle"
-                          style={{ color: isOpen ? color + "aa" : undefined }}
-                        >
+                        <div className="rm-phase-subtitle" style={{ color: isOpen ? color + "aa" : undefined }}>
                           {phase.subtitle}
                         </div>
                       </div>
                       <div className="rm-phase-meta">
-                        <span className="rm-phase-duration">
-                          ⏱ {phase.duration}
-                        </span>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 6,
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontFamily: "'Inter',sans-serif",
-                              fontSize: "0.7rem",
-                              color: isDone
-                                ? "var(--primary)"
-                                : "var(--text-3)",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
+                        <span className="rm-phase-duration">⏱ {phase.duration}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "0.7rem", color: isDone ? "var(--primary)" : "var(--text-3)", whiteSpace: "nowrap" }}>
                             {isDone ? "Completed" : "Mark done"}
                           </span>
                           <div
                             className={`rm-phase-check ${isDone ? "done" : ""}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleComplete(phase.id);
-                            }}
-                            title={
-                              isDone ? "Mark incomplete" : "Mark as complete"
-                            }
+                            onClick={(e) => { e.stopPropagation(); toggleComplete(phase.id); }}
+                            title={isDone ? "Mark incomplete" : "Mark as complete"}
                           />
                         </div>
                       </div>
@@ -580,67 +518,40 @@ export default function RoadmapPage() {
                       <div className="rm-phase-content">
                         {phase.topics?.length > 0 && (
                           <>
-                            <div className="rm-topics-label">
-                              Topics covered
-                            </div>
+                            <div className="rm-topics-label">Topics covered</div>
                             <div className="rm-topics">
                               {phase.topics.map((t) => (
-                                <span
-                                  key={t}
-                                  className="rm-topic"
-                                  style={{
-                                    borderColor: color + "44",
-                                    color,
-                                    background: color + "11",
-                                  }}
-                                >
+                                <span key={t} className="rm-topic" style={{ borderColor: color + "44", color, background: color + "11" }}>
                                   {t}
                                 </span>
                               ))}
                             </div>
                           </>
                         )}
-
                         {phase.outcome && (
                           <div className="rm-outcome">
                             <span className="rm-outcome-icon">🎯</span>
-                            <span className="rm-outcome-text">
-                              <strong>Phase outcome:</strong> {phase.outcome}
-                            </span>
+                            <span className="rm-outcome-text"><strong>Phase outcome:</strong> {phase.outcome}</span>
                           </div>
                         )}
-
                         {phase.resources?.length > 0 && (
                           <div className="rm-resources">
                             {phase.resources.map((r, ri) => (
-                              <a
-                                key={ri}
-                                href={r.url !== "#" ? r.url : undefined}
-                                className="rm-resource"
-                                target="_blank"
-                                rel="noreferrer"
-                              >
+                              <a key={ri} href={r.url !== "#" ? r.url : undefined} className="rm-resource" target="_blank" rel="noreferrer">
                                 <div className={`rm-resource-type ${r.type}`}>
                                   {r.type === "video" ? "▶" : "📄"}
                                 </div>
-                                <span className="rm-resource-label">
-                                  {r.label}
-                                </span>
+                                <span className="rm-resource-label">{r.label}</span>
                               </a>
                             ))}
                           </div>
                         )}
-
                         {phase.project && (
                           <div className="rm-project">
                             <span className="rm-project-icon">🏗️</span>
                             <div>
-                              <div className="rm-project-label">
-                                Phase project
-                              </div>
-                              <div className="rm-project-text">
-                                {phase.project}
-                              </div>
+                              <div className="rm-project-label">Phase project</div>
+                              <div className="rm-project-text">{phase.project}</div>
                             </div>
                           </div>
                         )}
@@ -652,7 +563,6 @@ export default function RoadmapPage() {
             </div>
           )}
 
-          {/* ── OVERVIEW TAB ── */}
           {activeTab === "overview" && (
             <div className="rm-overview-tab">
               <div className="rm-ov-card" style={{ animationDelay: "0s" }}>
@@ -660,20 +570,8 @@ export default function RoadmapPage() {
                 <div className="rm-stats-grid">
                   {[
                     { n: totalPhases, l: "Phases" },
-                    {
-                      n:
-                        rd.timeline ||
-                        `${roadmap.form_data?.timeline}mo` ||
-                        "—",
-                      l: "Timeline",
-                    },
-                    {
-                      n: `${phases.reduce(
-                        (a, p) => a + (p.resources?.length || 0),
-                        0
-                      )}+`,
-                      l: "Resources",
-                    },
+                    { n: rd.timeline || `${roadmap.form_data?.timeline}mo` || "—", l: "Timeline" },
+                    { n: `${phases.reduce((a, p) => a + (p.resources?.length || 0), 0)}+`, l: "Resources" },
                   ].map((s) => (
                     <div className="rm-stat-cell" key={s.l}>
                       <div className="rm-stat-num">{s.n}</div>
@@ -687,20 +585,10 @@ export default function RoadmapPage() {
                 <div className="rm-ov-card-title">Phase timeline</div>
                 <div className="rm-timeline-list">
                   {phases.map((phase, i) => {
-                    const color =
-                      phase.color || PHASE_COLORS[i % PHASE_COLORS.length];
+                    const color = phase.color || PHASE_COLORS[i % PHASE_COLORS.length];
                     return (
                       <div key={phase.id} className="rm-timeline-item">
-                        <div
-                          className="rm-tl-dot"
-                          style={{
-                            background: completed[phase.id]
-                              ? color
-                              : color + "22",
-                            borderColor: color,
-                            color: completed[phase.id] ? "#000" : color,
-                          }}
-                        >
+                        <div className="rm-tl-dot" style={{ background: completed[phase.id] ? color : color + "22", borderColor: color, color: completed[phase.id] ? "#000" : color }}>
                           {completed[phase.id] ? "✓" : i + 1}
                         </div>
                         <div className="rm-tl-info">
@@ -714,54 +602,15 @@ export default function RoadmapPage() {
                 </div>
               </div>
 
-              <div
-                className="rm-ov-card"
-                style={{
-                  animationDelay: "0.16s",
-                  textAlign: "center",
-                  padding: "36px",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "-1px",
-                    left: "20%",
-                    right: "20%",
-                    height: "1px",
-                    background:
-                      "linear-gradient(90deg, transparent, var(--primary), transparent)",
-                  }}
-                />
-                <div
-                  style={{
-                    fontFamily: "'Inter',sans-serif",
-                    fontSize: "1rem",
-                    fontWeight: 700,
-                    color: "var(--text-1)",
-                    letterSpacing: "-0.03em",
-                    marginBottom: 6,
-                  }}
-                >
+              <div className="rm-ov-card" style={{ animationDelay: "0.16s", textAlign: "center", padding: "36px", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: "-1px", left: "20%", right: "20%", height: "1px", background: "linear-gradient(90deg, transparent, var(--primary), transparent)" }} />
+                <div style={{ fontFamily: "'Inter',sans-serif", fontSize: "1rem", fontWeight: 700, color: "var(--text-1)", letterSpacing: "-0.03em", marginBottom: 6 }}>
                   Want expert guidance?
                 </div>
-                <div
-                  style={{
-                    fontFamily: "'Cormorant Garamond',serif",
-                    fontSize: "1.1rem",
-                    fontStyle: "italic",
-                    color: "var(--text-2)",
-                    marginBottom: 20,
-                  }}
-                >
+                <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.1rem", fontStyle: "italic", color: "var(--text-2)", marginBottom: 20 }}>
                   Book a 1:1 session with a career mentor
                 </div>
-                <button
-                  className="rm-action-btn rm-action-primary"
-                  style={{ margin: "0 auto" }}
-                >
+                <button className="rm-action-btn rm-action-primary" style={{ margin: "0 auto" }}>
                   Book a call →
                 </button>
               </div>
@@ -771,9 +620,6 @@ export default function RoadmapPage() {
         <Footer />
       </div>
 
-      {emailSent && (
-        <div className="rm-toast">✉ Roadmap PDF sent to your email!</div>
-      )}
       {copyDone && <div className="rm-toast">✓ Link copied to clipboard!</div>}
     </>
   );
@@ -792,14 +638,8 @@ function GeneratingScreen() {
 
   useEffect(() => {
     const t1 = setInterval(() => setDots((p) => (p + 1) % 4), 400);
-    const t2 = setInterval(
-      () => setStepIdx((p) => Math.min(p + 1, steps.length - 1)),
-      500
-    );
-    return () => {
-      clearInterval(t1);
-      clearInterval(t2);
-    };
+    const t2 = setInterval(() => setStepIdx((p) => Math.min(p + 1, steps.length - 1)), 500);
+    return () => { clearInterval(t1); clearInterval(t2); };
   }, []);
 
   return (
@@ -840,21 +680,11 @@ function GeneratingScreen() {
           </div>
           <span className="gen-title-line1">Building your</span>
           <span className="gen-title-line2">personalized roadmap</span>
-          <div className="gen-step">
-            {steps[stepIdx]}
-            {"".padEnd(dots, ".")}
-          </div>
+          <div className="gen-step">{steps[stepIdx]}{"".padEnd(dots, ".")}</div>
           <div className="gen-steps-track">
             {steps.map((s, i) => (
-              <div
-                key={i}
-                className={`gen-step-item ${
-                  i < stepIdx ? "done" : i === stepIdx ? "active" : ""
-                }`}
-              >
-                <div className="gen-step-icon">
-                  {i < stepIdx ? "✓" : i === stepIdx ? "◉" : ""}
-                </div>
+              <div key={i} className={`gen-step-item ${i < stepIdx ? "done" : i === stepIdx ? "active" : ""}`}>
+                <div className="gen-step-icon">{i < stepIdx ? "✓" : i === stepIdx ? "◉" : ""}</div>
                 {s}
               </div>
             ))}
