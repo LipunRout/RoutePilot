@@ -55,6 +55,7 @@ const Navbar = () => {
   const links = [
     { to: "/",         label: "Home",      icon: "⌂" },
     { to: "/category", label: "Explore",   icon: "◎" },
+    { to: "/contact",  label: "Contact",   icon: "✉" },
     { to: "/dashboard",label: "Dashboard", icon: "▤" },
   ];
 

@@ -284,8 +284,8 @@ const Footer = () => {
             </div>
 
             <div className="footer-bottom-links">
-              <a href="#" className="footer-bottom-link">Privacy</a>
-              <a href="#" className="footer-bottom-link">Terms</a>
+              <a href="https://rich-lake-255.notion.site/RoutePilot-Privacy-Policy-b3e7aa88079c4f33916d5caed76a5a4b" className="footer-bottom-link">Privacy</a>
+              <a href="https://rich-lake-255.notion.site/RoutePilot-Terms-of-Service-316364ad756d8039bd69ddbc7a730155" className="footer-bottom-link">Terms</a>
               <a href="#" className="footer-bottom-link">Contact</a>
             </div>
           </div>

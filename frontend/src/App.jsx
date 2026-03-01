@@ -12,6 +12,7 @@ import CategorySelect  from './pages/CategorySelect'
 import RoleSelect      from './pages/RoleSelect'
 import UserDetailsForm from './pages/UserDetailsForm'
 import RoadmapPage     from './pages/RoadmapPage'
+import ContactPage from './pages/ContactPage'
 // Components
 import ScrollToTop from './components/ScrollToTop'
 
@@ -63,6 +64,7 @@ function App() {
           <Route path="/"         element={<LandingPage />} />
           <Route path="/login"    element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/contact" element={<ContactPage />} />
 
           {/* Protected */}
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
