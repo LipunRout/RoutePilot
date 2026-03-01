@@ -130,6 +130,38 @@ export default function RoadmapPage() {
 
   if (loading) return <GeneratingScreen />;
   if (error)
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          gap: 16,
+          background: "var(--bg)",
+          fontFamily: "'Inter',sans-serif",
+        }}
+      >
+        <div style={{ fontSize: "2rem" }}>⚠️</div>
+        <div style={{ color: "var(--text-1)", fontWeight: 600 }}>{error}</div>
+        <button
+          onClick={() => navigate("/dashboard")}
+          style={{
+            padding: "10px 24px",
+            background: "var(--primary)",
+            border: "none",
+            borderRadius: 9,
+            fontWeight: 600,
+            cursor: "pointer",
+            color: "#000",
+          }}
+        >
+          ← Back to Dashboard
+        </button>
+      </div>
+    );
+  if (!roadmap) return null;
 
   return (
     <>
@@ -167,6 +199,7 @@ export default function RoadmapPage() {
         .rm-action-btn { display: inline-flex; align-items: center; gap: 7px; padding: 0 16px; height: 38px; border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 0.825rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease; white-space: nowrap; text-decoration: none; }
         .rm-action-primary { background: var(--primary); border: none; color: #000; }
         .rm-action-primary:hover { background: #00e089; box-shadow: 0 0 18px rgba(0,201,122,0.3); transform: translateY(-1px); }
+        .rm-action-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
         .rm-action-secondary { background: var(--bg-2); border: 1px solid var(--border); color: var(--text-2); }
         .rm-action-secondary:hover { background: var(--bg-3); border-color: var(--border-hover); color: var(--text-1); }
 
@@ -195,54 +228,49 @@ export default function RoadmapPage() {
         .rm-phase-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .rm-phase-duration { font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 500; color: var(--text-3); padding: 3px 9px; border: 1px solid var(--border); border-radius: 20px; background: var(--bg-2); white-space: nowrap; }
         .rm-phase-check {
-  width: 32px; height: 32px; border-radius: 50%;
-  border: 2px dashed var(--border);
-  background: var(--bg-2);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.8rem; font-weight: 700;
-  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-  flex-shrink: 0;
-  position: relative;
-  color: var(--text-3);
-}
-
-.rm-phase-check::before {
-  content: '✓';
-  opacity: 0.3;
-  font-size: 0.75rem;
-  color: var(--text-3);
-}
-
-.rm-phase-check:hover {
-  border-style: solid;
-  border-color: var(--primary);
-  background: rgba(0,201,122,0.08);
-  color: var(--primary);
-  transform: scale(1.1);
-  box-shadow: 0 0 12px rgba(0,201,122,0.2);
-}
-
-.rm-phase-check:hover::before {
-  opacity: 1;
-  color: var(--primary);
-}
-
-.rm-phase-check.done {
-  background: var(--primary);
-  border: 2px solid var(--primary);
-  border-style: solid;
-  color: #000;
-  box-shadow: 0 0 16px rgba(0,201,122,0.4);
-  transform: scale(1.05);
-}
-
-.rm-phase-check.done::before {
-  content: '✓';
-  opacity: 1;
-  color: #000;
-  font-weight: 800;
-}
+          width: 32px; height: 32px; border-radius: 50%;
+          border: 2px dashed var(--border);
+          background: var(--bg-2);
+          cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 0.8rem; font-weight: 700;
+          transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+          flex-shrink: 0;
+          position: relative;
+          color: var(--text-3);
+        }
+        .rm-phase-check::before {
+          content: '✓';
+          opacity: 0.3;
+          font-size: 0.75rem;
+          color: var(--text-3);
+        }
+        .rm-phase-check:hover {
+          border-style: solid;
+          border-color: var(--primary);
+          background: rgba(0,201,122,0.08);
+          color: var(--primary);
+          transform: scale(1.1);
+          box-shadow: 0 0 12px rgba(0,201,122,0.2);
+        }
+        .rm-phase-check:hover::before {
+          opacity: 1;
+          color: var(--primary);
+        }
+        .rm-phase-check.done {
+          background: var(--primary);
+          border: 2px solid var(--primary);
+          border-style: solid;
+          color: #000;
+          box-shadow: 0 0 16px rgba(0,201,122,0.4);
+          transform: scale(1.05);
+        }
+        .rm-phase-check.done::before {
+          content: '✓';
+          opacity: 1;
+          color: #000;
+          font-weight: 800;
+        }
         .rm-phase-chevron { font-size: 0.78rem; color: var(--text-3); transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); flex-shrink: 0; }
         .rm-phase.open .rm-phase-chevron { transform: rotate(90deg); }
 
@@ -353,6 +381,7 @@ export default function RoadmapPage() {
               </div>
 
               <div className="rm-hero-actions">
+                {/* ── DOWNLOAD PDF (replaces email) ── */}
                 <button
                   className="rm-action-btn rm-action-primary"
                   onClick={handleDownload}
@@ -420,7 +449,6 @@ export default function RoadmapPage() {
               </div>
             )}
 
-            {/* Certificate modal */}
             {showCert && (
               <Certificate
                 userName={userName}
@@ -737,9 +765,6 @@ export default function RoadmapPage() {
         <Footer />
       </div>
 
-      {emailSent && (
-        <div className="rm-toast">✉ Roadmap PDF sent to your email!</div>
-      )}
       {copyDone && <div className="rm-toast">✓ Link copied to clipboard!</div>}
     </>
   );
