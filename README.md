@@ -19,11 +19,29 @@
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | JavaScript, HTML, CSS |
-| Backend | Node.js |
-| Deployment | Vercel |
+### Frontend
+| Technology | Purpose |
+|-----------|---------|
+| ⚛️ **React** | UI framework for building interactive components |
+| 🌐 **HTML / CSS** | Markup and styling |
+| ⚡ **JavaScript (ES6+)** | Application logic and interactivity |
+
+### Backend
+| Technology | Purpose |
+|-----------|---------|
+| 🟢 **Node.js** | JavaScript runtime environment |
+| 🚂 **Express.js** | REST API framework and route handling |
+| 🗄️ **Supabase** | Database, authentication, and real-time backend-as-a-service |
+
+### AI & Intelligence
+| Technology | Purpose |
+|-----------|---------|
+| 🤖 **Groq API** | Ultra-fast AI inference for intelligent route suggestions and assistance |
+
+### DevOps & Deployment
+| Technology | Purpose |
+|-----------|---------|
+| 🚀 **Vercel** | Frontend hosting with CI/CD on every push |
 
 ---
 
