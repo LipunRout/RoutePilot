@@ -42,6 +42,7 @@
 | Technology | Purpose |
 |-----------|---------|
 | 🚀 **Vercel** | Frontend hosting with CI/CD on every push |
+| 🟣 **Render** | Backend hosting and server deployment |
 
 ---
 
