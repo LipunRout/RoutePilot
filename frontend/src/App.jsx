@@ -1,7 +1,10 @@
+// Add useState to the import:
+import { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { ThemeProvider } from './context/ThemeContext'
 import { useAuth } from './context/AuthContext'
+import PageLoader from './components/PageLoader'
 
 // Pages
 import LandingPage     from './pages/LandingPage'
@@ -41,8 +44,11 @@ const ProtectedRoute = ({ children }) => {
 }
 
 function App() {
+  const [loading, setLoading] = useState(true)
   return (
-    <BrowserRouter>
+    <>
+    {loading && <PageLoader onDone={() => setLoading(false)} />}
+    {<BrowserRouter>
       <ThemeProvider>
         <Toaster
           position="top-right"
@@ -76,7 +82,8 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ThemeProvider>
-    </BrowserRouter>
+    </BrowserRouter>}
+    </>
   )
 }
 
