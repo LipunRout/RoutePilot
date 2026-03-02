@@ -11,7 +11,7 @@ const {
 
 const router = express.Router()
 
-router.get('/api/download-pdf/:roadmapId', requireAuth, downloadPDF)
+router.get('/download-pdf/:roadmapId', requireAuth, downloadPDF)
 
 router.post  ('/generate-roadmap',      requireAuth, generateRoadmap)
 router.get   ('/roadmaps',              requireAuth, getRoadmaps)
