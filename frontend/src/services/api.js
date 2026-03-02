@@ -21,7 +21,7 @@ api.interceptors.request.use(async (config) => {
   return config
 })
 export const downloadRoadmapPDF = async (roadmapId, role) => {
-  const res = await api.get(`/api/download-pdf/${roadmapId}`, {
+  const res = await api.get(`/download-pdf/${roadmapId}`, {
     responseType: 'blob',   // ← important: receive binary
   })
   // Trigger browser download
